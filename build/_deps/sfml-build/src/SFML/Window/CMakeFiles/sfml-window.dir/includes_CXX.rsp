@@ -1,0 +1,1 @@
+-I"S:/dev/cpprepos/CPUEMU_2/build/_deps/sfml-src/include" -I"S:/dev/cpprepos/CPUEMU_2/build/_deps/sfml-src/src" -I"S:/dev/cpprepos/CPUEMU_2/build/_deps/sfml-src/extlibs/headers/vulkan" -isystem "S:/dev/cpprepos/CPUEMU_2/build/_deps/sfml-src/extlibs/headers/glad/include"
