@@ -95,7 +95,33 @@ namespace sh {
             void Write(u16 address, u16 value);
             void StackPush(u16 value);
             u16 StackPop();
-
+            std::map<u16, std::vector<u16>> VALID_OPCODES = {
+                { ADDC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { SUBC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { MULT, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { INCR, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
+                { DECR, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
+                { BAND, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { BBOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { BNOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { BXOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { PUSH, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
+                { POPS, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
+                { LODA, {      IMM, ABS, ABB, ABC, IND, INB, INC                                    }},
+                { LODB, {      IMM, ABS,      ABC, IND,      INC                                    }},
+                { LODC, {      IMM, ABS, ABB,      IND, INB,                                        }},
+                { STRA, {           ABS, ABB, ABC, IND, INB, INC                                    }},
+                { STRB, {           ABS,      ABC, IND,      INC                                    }},
+                { STRC, {           ABS, ABB,      IND, INB,                                        }},
+                { SWAP, {                                                                       RG2 }},
+                { MOVE, {                                                                       RG2 }},
+                { JUMP, {           ABS,           IND                                              }},
+                { JMPC, {           ABS,           IND                                              }},
+                { JMPZ, {           ABS,           IND                                              }},
+                { JMPN, {           ABS,           IND                                              }},
+                { JSUB, {           ABS,           IND                                              }},
+                { RSUB, { IMP                                                                       }},
+            };
 
     };
 

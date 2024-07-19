@@ -195,13 +195,14 @@ namespace sh {
                 }
             case PUSH: {
                 Fetch();
-                stackPointer += 1;
-                Write(CPU_STACK_START + stackPointer, fetched);
+                StackPush(fetched);
                 break;
                 }
             case POPS: {
-                stackReturn = Read(CPU_STACK_START + stackPointer);
-                stackPointer -= 1;
+                stackReturn = StackPop();
+                if (dst_reg != nullptr) {
+                    *dst_reg = stackReturn;
+                }
                 break;
                 }
             case LODA: {
@@ -228,18 +229,23 @@ namespace sh {
                 break;
                 }
             case STRC: {
-                Write(address_absolute, B);
+                Write(address_absolute, C);
                 break;
                 }
             case SWAP: {
-                temp = *src_reg;
-                *src_reg = *dst_reg;
-                *dst_reg = temp;
+                if (src_reg != nullptr && dst_reg != nullptr) {
+                    temp = *src_reg;
+                    *src_reg = *dst_reg;
+                    *dst_reg = temp;
+                
+                }
 
                 break;
                 }
             case MOVE: {
-                *dst_reg = *src_reg;
+                if (src_reg != nullptr && dst_reg != nullptr) {
+                    *dst_reg = *src_reg;
+                }
                 break;
                 }
             case JUMP: {
@@ -265,10 +271,13 @@ namespace sh {
                 break;
                 }
             case JSUB: {
-
+                StackPush(PC-1);
+                PC = address_absolute;
                 break;
                 }
             case RSUB: {
+                PC = StackPop();
+                PC += 1;
                 break;
                 }
         }
@@ -310,9 +319,14 @@ namespace sh {
         memory[address] = value;
     }
     void CPU::StackPush(u16 value) {
-        
+        stackPointer += 1;
+        Write(CPU_STACK_START + stackPointer, value);    
+
     }
     u16 CPU::StackPop() {
+        stackReturn = Read(CPU_STACK_START + stackPointer);
+        stackPointer -= 1;    
+        return stackReturn;
     }
 
 
