@@ -95,7 +95,7 @@ namespace sh {
             void Write(u16 address, u16 value);
             void StackPush(u16 value);
             u16 StackPop();
-            std::map<u16, std::vector<u16>> VALID_OPCODES = {
+            inline static std::map<u16, std::vector<u16>> VALID_OPCODES_LOOKUP = {
                 { ADDC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { SUBC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { MULT, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
@@ -122,6 +122,7 @@ namespace sh {
                 { JSUB, {           ABS,           IND                                              }},
                 { RSUB, { IMP                                                                       }},
             };
+            std::vector<u16> ValidOpcodes;
 
     };
 

@@ -8,6 +8,16 @@ namespace sh {
         instruction = 0;
         address_absolute = 0;
         address_mode = 0;
+
+        for (auto [instr,amlist] : VALID_OPCODES_LOOKUP) {
+            
+            for (auto am : amlist) {
+                u16 opcode = ((instr << 8) & 0xff00) | (am & 0x00ff);
+                if (std::find(ValidOpcodes.begin(), ValidOpcodes.end(), opcode) == ValidOpcodes.end()) {
+                    ValidOpcodes.push_back(opcode);
+                }
+            }
+        }
     }
 
 
