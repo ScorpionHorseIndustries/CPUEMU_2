@@ -35,6 +35,18 @@ namespace sh {
                 JMPN,    //         //jump on negative
                 JSUB,    //         //jump to subroutine
                 RSUB,    //         //return from subroutine
+                HALT,    //         Flag Halt           Set
+                FCST,    //         Flag Carry          Set
+                FNST,    //         Flag Negative       Set
+                FZST,    //         Flag Zero           Set
+                FVST,    //         Flag Overflow       Set
+                FFST,    //         Flag Floating Point Set
+                FCCL,    //         Flag Carry          Clear
+                FNCL,    //         Flag Negative       Clear
+                FZCL,    //         Flag Zero           Clear
+                FVCL,    //         Flag Overflow       Clear
+                FFCL,    //         Flag Floating Point Clear
+                
             
             };
 
@@ -47,13 +59,22 @@ namespace sh {
                 IND,        //indirect
                 INB,        //indirect+b
                 INC,        //indurect+c
-                RGA,        //one register
-                RGB,        //one register
-                RGC,        //one register
-                RGX,        //one register
-                RGY,        //one register
-                RGZ,        //one register
+                RGA,        //one register A
+                RGB,        //one register B
+                RGC,        //one register C
+                RGX,        //one register X
+                RGY,        //one register Y
+                RGZ,        //one register Z
                 RG2,        //two registers                                                                      
+            };
+
+            enum REG_INDEX : u8 {
+                RIA = 0,
+                RIB,
+                RIC,
+                RIX,
+                RIY,
+                RIZ,
             };
             //registers
             u16 A,B,C,X,Y,Z;
@@ -77,6 +98,12 @@ namespace sh {
             std::array<u16, CPU_MEMORY_SIZE> memory;
             u8 stackPointer;
             u16 stackReturn;
+            u16 mwAddress = 0;
+            void mwWrite(u8 instruction, u8 address_mode, u16 arg = 0, bool extra = false);
+            u16 MakeOpcode(u8 _instr, u8 _addr_mode);
+            u16 MakeReg2(u8 _from, u8 to);
+            std::string str();
+            
 
 
             struct Flags {
@@ -121,6 +148,17 @@ namespace sh {
                 { JMPN, {           ABS,           IND                                              }},
                 { JSUB, {           ABS,           IND                                              }},
                 { RSUB, { IMP                                                                       }},
+                { HALT, { IMP                                                                       }},
+                { FCST, { IMP                                                                       }},
+                { FNST, { IMP                                                                       }},
+                { FZST, { IMP                                                                       }},
+                { FVST, { IMP                                                                       }},
+                { FFST, { IMP                                                                       }},
+                { FCCL, { IMP                                                                       }},
+                { FNCL, { IMP                                                                       }},
+                { FZCL, { IMP                                                                       }},
+                { FVCL, { IMP                                                                       }},
+                { FFCL, { IMP                                                                       }},
             };
             std::vector<u16> ValidOpcodes;
 

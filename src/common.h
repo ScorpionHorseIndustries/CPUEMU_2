@@ -8,6 +8,8 @@
 #include <array>
 #include <map>
 #include <algorithm>
+#include <stdexcept>
+#include <format>
 #include <SFML/Graphics.hpp>
 #include <imgui-SFML.h>
 #include <imgui.h>

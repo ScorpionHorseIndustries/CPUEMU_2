@@ -2,11 +2,18 @@
 
 int main(int argc, char* argv[]) {
 
-    for (int i = 0; i < argc; i += 1) {
-        std::cout << argv[i] << std::endl;
+    sh::CPU cpu;
+    while (!cpu.flags.HALT) {
+        cpu.Tick();
     }
-    std::cout << "hello" << std::endl;
-    sh::Window window;
+
+    std::cout << cpu.str() << std::endl;
+    // for (int i = 0; i < argc; i += 1) {
+    //     std::cout << argv[i] << std::endl;
+    // }
+    // std::cout << "hello" << std::endl;
+    // sh::Window window;
     
-    return window.Loop();
+    // return window.Loop();
+    return 0;
 }
