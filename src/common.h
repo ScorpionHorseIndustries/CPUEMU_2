@@ -9,11 +9,13 @@
 #include <map>
 #include <algorithm>
 #include <stdexcept>
+#include <sstream>
 #include <format>
+#include <regex>
+#include <fstream>
 #include <SFML/Graphics.hpp>
-#include <imgui-SFML.h>
-#include <imgui.h>
 #include "defines.h"
+#include "funcs.h"
 #include "cpu.h"
 #include "window.h"
 #include "assembler.h"

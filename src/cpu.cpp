@@ -9,33 +9,57 @@ namespace sh {
         address_absolute = 0;
         address_mode = 0;
 
-        for (auto [instr,amlist] : VALID_OPCODES_LOOKUP) {
+        // for (auto [instr,amlist] : VALID_OPCODES_LOOKUP) {
             
-            for (auto am : amlist) {
-                u16 opcode = ((instr << 8) & 0xff00) | (am & 0x00ff);
-                if (std::find(ValidOpcodes.begin(), ValidOpcodes.end(), opcode) == ValidOpcodes.end()) {
-                    ValidOpcodes.push_back(opcode);
-                }
-            }
-        }
+        //     for (auto am : amlist) {
+        //         u16 opcode = ((instr << 8) & 0xff00) | (am & 0x00ff);
+        //         if (std::find(ValidOpcodes.begin(), ValidOpcodes.end(), opcode) == ValidOpcodes.end()) {
+        //             ValidOpcodes.push_back(opcode);
+        //         }
+        //     }
+        // }
 
         //write a program
         mwAddress = 0;
-        u16 address_loop;
-        mwWrite(LODA, IMM, 0, true);                //2
-        mwWrite(STRA, ABS, CPU_RAM_START, true);    //2
-        // mwWrite(INCR, RGB);             
-        // mwWrite(MOVE, RG2, MakeReg2(REG_INDEX::RIB, REG_INDEX::RIC), true); //5
-        address_loop = mwAddress;
-        mwWrite(LODA, ABS, CPU_RAM_START, true); //2
-        mwWrite(INCR, RGA);                     //1
-        mwWrite(STRA, ABS, CPU_RAM_START, true);//2
-        mwWrite(FCCL, IMP);//1
-        mwWrite(SUBC, IMM, 20, true);
-        mwWrite(JMPZ, ABS, 18, true);   //8
-        mwWrite(JUMP, ABS, address_loop, true);    //10
+
+        u16 loop_address = 0;
+        mwWrite(LODA, IMM, 0);
+        mwWrite(STRA, ABS, CPU_RAM_START);
+        loop_address = mwAddress;
+        mwWrite(LODA, ABS, CPU_RAM_START);
+        mwWrite(INCR, RGA);
+        mwWrite(STRA, ABS, CPU_RAM_START);
+        mwWrite(FCST);
+        mwWrite(SUBC, IMM, 3);
+        mwWrite(FCCL);
+        mwWrite(JMPZ, ABS, mwAddress+4);
+        mwWrite(JUMP, ABS, loop_address);
+        mwWrite(HALT);
+
         
-        mwWrite(HALT, IMP);             //18
+
+        // mwWrite(LODA, IMM, 0);
+        // mwWrite(INCR, RGA);
+        // mwWrite(FCST, IMP); //set carry so subtraction works properly
+        // mwWrite(SUBC, IMM, 1);
+        
+        // mwWrite(HALT,IMP);
+
+        // u16 address_loop;
+        // mwWrite(LODA, IMM, 0, true);                //2
+        // mwWrite(STRA, ABS, CPU_RAM_START, true);    //2
+        // // mwWrite(INCR, RGB);             
+        // // mwWrite(MOVE, RG2, MakeReg2(REG_INDEX::RIB, REG_INDEX::RIC), true); //5
+        // address_loop = mwAddress;
+        // mwWrite(LODA, ABS, CPU_RAM_START, true); //2
+        // mwWrite(INCR, RGA);                     //1
+        // mwWrite(STRA, ABS, CPU_RAM_START, true);//2
+        // mwWrite(FCCL, IMP);//1
+        // mwWrite(SUBC, IMM, 20, true);
+        // mwWrite(JMPZ, ABS, 18, true);   //8
+        // mwWrite(JUMP, ABS, address_loop, true);    //10
+        
+        // mwWrite(HALT, IMP);             //18
         
         PC = 0;
 
@@ -65,6 +89,15 @@ namespace sh {
         output += std::format(" 2[{:04x}]", memory[CPU_RAM_START+2]);
         output += std::format(" 3[{:04x}]", memory[CPU_RAM_START+3]);
 
+        output += " F[";
+        output += flags.CARRY       ? "C" : "-";
+        output += flags.NEGATIVE    ? "N" : "-";
+        output += flags.ZERO        ? "Z" : "-";
+        output += flags.OVERFLOW    ? "V" : "-";
+        output += flags.FLOAT       ? "F" : "-";
+        output += flags.HALT        ? "H" : "-";
+        output += "]";
+
         
         return output;
     }
@@ -76,16 +109,22 @@ namespace sh {
         opcode = 0;
         address_absolute = 0;
         u16 which_registers = 0;
+        
 
         src_reg = nullptr;
         dst_reg = nullptr;
 
         opcode = memory[PC];
+        if (opcode == 0) {
+            instruction = INSTRUCTIONS::HALT;
+            address_mode = ADDRESS_MODES::IMP;
+        } else {
+            DecodeOpcode(opcode, &instruction, &address_mode);
+        }
         PC += 1;
 
-        instruction = (opcode >> 8) & 0xff;
-        address_mode = opcode & 0xff;
-
+        std::string current_opcode_name = GetOpcodeFullName(instruction, address_mode);
+        std::cout << std::format("BEGIN PC[{:04x}] {} FE[{:02x}]", PC, current_opcode_name, fetched) << str() << std::endl;
         
 
 
@@ -189,8 +228,8 @@ namespace sh {
                 Fetch();
                 u32 value = ((u32)fetched) ^ 0xffff;
                 temp = (u32)A + value + (u32)(flags.CARRY ? 1 : 0);
-                flags.CARRY = temp > 0xffff;
-                flags.ZERO = temp & 0xffff == 0;
+                flags.CARRY = temp & 0xffff0000;
+                flags.ZERO = (temp & 0xffff) == 0;
                 flags.NEGATIVE = temp & 0x8000 != 0;
                 A = temp & 0xffff;                
                 break;
@@ -198,7 +237,7 @@ namespace sh {
             case MULT: {
                 Fetch();
                 temp = (u32)A * (u32)fetched;
-                flags.CARRY = temp > 0xffff;
+                flags.CARRY = temp & 0xffff0000;
                 flags.ZERO = temp & 0xffff == 0;
                 flags.NEGATIVE = temp & 0x8000 != 0;
                 A = temp & 0xffff;            
@@ -209,7 +248,7 @@ namespace sh {
                     temp = ((u32)*dst_reg) + (u32)1;
                     flags.CARRY = temp > 0xffff;
                     flags.ZERO = temp & 0xffff == 0;
-                    flags.NEGATIVE = temp & 0x8000 != 0;
+                    flags.NEGATIVE = (temp & 0x8000);
                     *dst_reg = temp & 0xffff;                       
 
                 }
@@ -388,13 +427,13 @@ namespace sh {
             }
         }
 
-        std::cout << std::format("PC[{:04x}] IN[{:02x}] AM[{:02x}] FE[{:02x}]", PC, instruction, address_mode, fetched) << str() << std::endl;
+        std::cout << std::format("  END PC[{:04x}] {} FE[{:02x}]", PC, GetOpcodeFullName(instruction, address_mode), fetched) << str() << std::endl;
 
     
     }
 
     u16 CPU::Fetch() {
-
+        fetched = A;
         switch (address_mode) {
             case IMP:
                 break;
@@ -418,16 +457,17 @@ namespace sh {
     
     }
 
-    void CPU::mwWrite(u8 _instr, u8 _addr_mode, u16 arg, bool extra) {
+    void CPU::mwWrite(u8 _instr, u8 _addr_mode, u16 arg) {
 
-        auto& valid_address_modes = VALID_OPCODES_LOOKUP[_instr];
-        if (std::find(valid_address_modes.begin(), valid_address_modes.end(), _addr_mode) == valid_address_modes.end()) {
+        
+        if (!IsValidOpcode(_instr, _addr_mode)) {
             std::string error = std::format("Invalid Combination INSTR[{}] ADDRM[{}]", _instr, _addr_mode);
             throw std::runtime_error(error);
         } else {
-            memory[mwAddress] = MakeOpcode(_instr, _addr_mode);
+            memory[mwAddress] = EncodeOpcode(_instr, _addr_mode);
             mwAddress += 1;
-            if (extra) {
+
+            if (ADDRESS_MODE_LENGTH.at(_addr_mode) > 1) {
                 memory[mwAddress] = arg;
                 mwAddress += 1;
             }
@@ -435,9 +475,14 @@ namespace sh {
         }
     }
 
-    u16 CPU::MakeOpcode(u8 _instr, u8 _addr_mode) {
+    u16 CPU::EncodeOpcode(u8 _instr, u8 _addr_mode) {
         return (_instr << 8) | _addr_mode;
     
+    }
+    void CPU::DecodeOpcode(u16 _opcode, u8* _out_instr_ptr, u8* _out_am_ptr) {
+
+        *_out_instr_ptr  = (_opcode >> 8) & 0xff;
+        *_out_am_ptr     = _opcode & 0xff;
     }
 
     u16 CPU::Read(u16 address) {

@@ -5,19 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "cmake",
-            "request": "launch",
-            "name": "CMake: Configure project",
-            "cmakeDebugType": "configure",
-            "clean": false,
-            "configureAll": false
-        },
-
-        {
-            "name": "(gdb) Attach",
+            "name": "(gdb) Launch",
             "type": "cppdbg",
-            "request": "attach",
-            "program": "build\\bin\\main.exe",
+            "request": "launch",
+            "program": "${workspaceFolder}\\build\\bin\\cpuemu.exe",
+            "args": [
+                "-f",
+                "programs\\basics.asm"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
             "setupCommands": [

@@ -1,43 +1,34 @@
-cmake_minimum_required(VERSION 3.16)
-project(CMakeSFMLProject LANGUAGES CXX)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+cmake_minimum_required(VERSION 3.10)
+project(cpuemu VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include(FetchContent)
 
-FetchContent_Declare(SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 2.6.x)
-FetchContent_MakeAvailable(SFML)
-
-FetchContent_Declare(ImGui
-    GIT_REPOSITORY https://github.com/ocornut/imgui
-    GIT_TAG v1.89.9)
-FetchContent_MakeAvailable(ImGui)
-FetchContent_GetProperties(ImGui SOURCE_DIR IMGUI_DIR)
-
-set(IMGUI_SFML_FIND_SFML OFF)
-FetchContent_Declare(ImGui-SFML
-    GIT_REPOSITORY https://github.com/SFML/imgui-sfml
-    GIT_TAG 2.6.x)
-FetchContent_MakeAvailable(ImGui-SFML)
-
-add_executable(main 
-    src/window.cpp
-    src/cpu.cpp 
-    src/assembler.cpp
+set(SOURCE_FILES
     src/main.cpp
-    )
-target_link_libraries(main PRIVATE sfml-graphics ImGui-SFML::ImGui-SFML)
-target_compile_features(main PRIVATE cxx_std_17)
+    src/assembler.cpp
+    src/cpu.cpp
+    src/window.cpp
+    src/funcs.cpp
+)
+set(SFML_DIR "S:\\dev\\cpplibs\\SFML-2.6.1\\lib\\cmake\\SFML")
+set(SFML_STATIC_LIBRARIES TRUE)
+find_package(SFML COMPONENTS graphics window system REQUIRED)
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-if(WIN32)
-    add_custom_command(
-        TARGET main
-        COMMENT "Copy OpenAL DLL"
-        PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${SFML_SOURCE_DIR}/extlibs/bin/$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,x86>/openal32.dll $<TARGET_FILE_DIR:main>
-        VERBATIM)
+
+#S:\dev\cpplibs\SFML-2.6.1\include
+
+if (SFML_FOUND)
+    target_link_libraries(${PROJECT_NAME}
+        sfml-graphics
+        sfml-window
+        sfml-system
+        opengl32
+        winmm
+        gdi32
+    )
+
 endif()
