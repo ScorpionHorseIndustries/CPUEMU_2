@@ -29,6 +29,46 @@ namespace sh {
         
         }
     }
+
+    bool Assembler::Assemble() {
+        std::vector<Output> output;
+        u16 byte_position = 0;
+        for (auto& tl : lines) {
+            Token* first = &tl.tokens[0];
+            Token* second = nullptr;
+            if (tl.tokens.size() > 1) {
+                second = &tl.tokens[1];
+            }
+
+            if (first->type == KEYWORD) {
+                Output out;
+                out.instruction = CPU::GetInstructionCode(first->value);
+                out.address = byte_position;
+
+                if (second == nullptr) {
+                    out.address_mode = CPU::ADDRESS_MODES::IMP;
+                } else {
+                    out.address_mode = second->address_mode;
+                    
+                    
+                }
+
+
+
+            } else if (first->type == LABEL_DECLARE) {
+                Output out;
+                out.label = first->value;
+                out.isLabel = true;
+                output.push_back(out);
+            } else {
+                //error
+            }
+
+
+        }
+        return (output.size() > 0);
+    
+    }
     std::vector<Assembler::Token> Assembler::Tokenise(const std::string& ln) {
         std::vector<Token> tokens;
 
@@ -49,97 +89,26 @@ namespace sh {
 
         auto elements = SplitString(cpy,' ');
 
-        
-        for (auto& elem : elements) {
-            
-            if (elem.length() == 0) continue;
-
-            if (elem.length() == 1 && AllInList(elem, REGNAMES)) {
-                tokens.push_back({elem, REGISTER});
-            } else if (elem.length() == 3 && CharInList(elem[0],REGNAMES) && elem[1] == ',' && CharInList(elem[2], REGNAMES)) {
-                tokens.push_back({elem, REGISTER_PAIR});   
-            } else if (elem.starts_with('$')) {
-                tokens.push_back({elem, ADDRESS_LITERAL});
-            } else if (elem.ends_with(':')) {
-                tokens.push_back({elem, LABEL_DECLARE});
-            } else if (elem.starts_with('#')) {
-                tokens.push_back({elem, NUMERIC_LITERAL});
-            } else if (elem.starts_with('(')) { 
-                tokens.push_back({elem, INDIRECT_ADDRESS});
-            } else if (elem.starts_with('@')) {
-                tokens.push_back({elem, VAR_USE});
-            } else if (AllInList(elem, KEYWORD_CHARS)) {            
-
-                u8 instr_code = CPU::GetInstructionCode(elem);
-
-                if (instr_code > 0) {
-                    tokens.push_back({elem, KEYWORD });
-                } else {
-                    tokens.push_back({elem, LABEL_USE});
-                }
-
-            } else if (AllInList(elem, LABEL_CHARS)) {
-                tokens.push_back({elem, LABEL_USE});
+        if (elements.size() == 1) {
+            if (elements[0].ends_with(':')) {
+                //declare label
+                tokens.push_back({elements[0], LABEL_DECLARE});
             } else {
-                //must be decimal address literal, right?
-                tokens.push_back({elem, ADDRESS_LITERAL});
+                //keyword
+                if (CPU::GetInstructionCode(elements[0]) > 0) {
+                    tokens.push_back({elements[0], KEYWORD});
+                } else {
+                    //fucken error, innit
+                }
             }
+        } else if (elements.size() == 2) {
+
         }
 
+
         return tokens;
-
     }
-        // tk_current_string = std::string(ln);
-        // tk_cursor = 0;
-        // tk_current = '\0';
-        // tk_finished = false;
-        // std::vector<Token> tokens;
 
-        // tk_advance();
-        // std::string value = "";
-        // TOKEN_TYPE type = TOKEN_TYPE::NONE;
-        // while (!tk_finished) {
-        //     if (tk_current == ';') {
-        //         tk_finished = true;
-
-        //     } else if (tk_current == ' ' || tk_current == '\t') {
-        //         tk_advance();
-        //     } else if (IsIdentStart(tk_current)) {
-        //         value = "";
-        //         value += tk_current;
-        //         type = TOKEN_TYPE::TEXT;
-        //         tk_advance();
-        //         while (!tk_finished && IsIdentMiddle(tk_current)) {
-        //             value += tk_current;
-        //             tk_advance();
-        //         }
-        //         tokens.push_back({value,type});
-
-
-                
-        //     } else if (IsNumericStart(tk_current)) {
-        //         value = "";
-        //         value += tk_current;
-        //         type = TOKEN_TYPE::NUMERIC;
-        //         tk_advance();
-        //         while (!tk_finished && IsNumericMiddle(tk_current)) {
-        //             value += tk_current;
-        //             tk_advance();
-        //         }
-        //         tokens.push_back({value,type});            
-            
-            
-        //     } else {
-        //         tk_advance();
-        //     }
-        
-        // }
-
-    //     return tokens;
-
-
-
-    // }
     bool Assembler::Tokenise() {
         lines.clear();
         if (data.length() > 0) {
@@ -172,7 +141,7 @@ namespace sh {
     }
 
     std::string Assembler::Token::str() const {
-        return std::format("[{}[{}][{}]]",value, TOKEN_TYPE_NAMES.at(type), value_int);
+        return std::format("[{}[{}][{}][{}]]",value, TOKEN_TYPE_NAMES.at(type), value_int, sub_value);
     }
 
     Assembler::Token::Token(std::string _value, TOKEN_TYPE _type) : value(_value), type(_type) {
@@ -180,62 +149,62 @@ namespace sh {
         int base = 10;
         bool readHex = false;
         bool readDec = true;
-        sub_value_type = TSVT_NONE;
-        // std::string cpy = std::string(value);
-        // Remove(cpy, '(');
-        // Remove(cpy, ')');
-        if (type == INDIRECT_ADDRESS) {
-            sub_value_type = TSVT_INT;
-            for (char c : value) {
-                if (c == '(') continue;
-                if (c == '$') {
-                    sub_value_type = TSVT_INT;
-                    break;
-                }
-                if (c == '@') {
-                    sub_value_type = TSVT_VAR;
-                    break;
-                }
+        sub_value = "";
 
-                if (CharInList(c, IDENT_START)) {
-                    sub_value_type = TSVT_LABEL;
-                    break;
-                }
-            
+        for (auto& [rgx_string, adrm_type_pair] : REGEX_GRAMMAR) {
+        
+            std::regex rgx(rgx_string, std::regex_constants::icase);
+
+            if (std::regex_match(value, rgx)) {
+                address_mode = adrm_type_pair.first;
+                sub_value_type = adrm_type_pair.second;
+                break;
             }
-        } else if (type == ADDRESS_LITERAL || type == NUMERIC_LITERAL) {
-            sub_value_type = TSVT_INT;
-        }
+        }    
 
-        if (sub_value_type == TSVT_INT) {
+
+        if (sub_value_type == HEX || sub_value_type == DEC) {
+            bool readHex = sub_value_type == HEX;
+            int base = readHex ? 16 : 10;
             for (char c : value) {
-
-                if (c == ')') break;
                 if (c == ',') break;
-                if (c == '@') break;
-
-                if (c == '$') {
-                    readHex = true;
-                    base = 16;
-                    continue;
+                if (c == ')') break;
+                if (CharInList(c, DECIMAL_CHARS)) {
+                    sub_value += c;
                 }
 
                 if (readHex && CharInList(c, HEX_CHARS)) {
-                    
-                    int_to_parse += c;
+                    sub_value += c;
                 }
-
-                if (readDec && CharInList(c, DECIMAL_CHARS)) {
-                    int_to_parse += c;
-                }
-
-                
             }
+
+            if (sub_value.length() > 0) {
+                value_int = std::stoi(sub_value, nullptr, base);
+            }
+
+ 
         }
 
-        if (int_to_parse.length() > 0) {
-            value_int = std::stoi(int_to_parse, nullptr, base);
+        if (sub_value_type == LBL || sub_value_type == VAR) {
+            for (char c : value) {
+                if (c == ',') break;
+                if (c == ')') break;
+                if (CharInList(c, LABEL_CHARS)) {
+                    sub_value += c;
+                }
+            
+            }
+        
         }
+
+        if (address_mode == CPU::ADDRESS_MODES::RG2) {
+            registerFrom = CPU::REGISTER_NAMES.at(value[0]);
+            registerTo = CPU::REGISTER_NAMES.at(value[2]);
+        }
+
+
+
+        
 
         
 
@@ -250,6 +219,8 @@ namespace sh {
         std::string k = GetKey(lbl);
         if (LabelExists(lbl)) {
             return Labels[k];
+        } else {
+            throw std::runtime_error(std::format("label [{}]not found", lbl));
         }
     }
     void Assembler::LabelSet(std::string lbl, u16 address, bool isVar) { 

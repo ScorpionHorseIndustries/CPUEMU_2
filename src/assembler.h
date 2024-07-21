@@ -54,12 +54,13 @@ namespace sh {
             };
 
             enum TOKEN_SUB_VALUE_TYPE : u8 {
-                TSVT_NONE = 0,
-                TSVT_LABEL,
-                TSVT_VAR,
-                TSVT_INT
-            
+                HEX=1,
+                DEC,
+                LBL,
+                VAR,
+                REG
             };
+            
             inline static const std::map<u8, std::string> TOKEN_TYPE_NAMES = {
                 { NONE                  , "NONE"                    },
                 { TEXT                  , "TEXT"                    },
@@ -78,17 +79,19 @@ namespace sh {
             };
             struct Token {
                 std::string value;
+                std::string sub_value;
                 TOKEN_TYPE type;
-                TOKEN_SUB_VALUE_TYPE sub_value_type;
+                u8 sub_value_type;
                 int value_int = 0;
-                std::string labelvar_name;
+                // std::string labelvar_name;
                 int registerFrom = 0, registerTo = 0;
                 Token(std::string _value, TOKEN_TYPE _type);
-
+                u8 address_mode = 0;
+                 
                 std::string str() const;
             };
 
-            struct Something {
+            struct Output {
                 bool        isLabel         = 0;
                 u16         opcode          = 0;
                 u8          instruction     = 0;
@@ -101,12 +104,16 @@ namespace sh {
 
             
             };
+            
 
             struct TokenLine {
                 std::string line;
                 std::vector<Token> tokens;
 
+
             };
+
+            
             std::vector<TokenLine> lines;
             std::string data;
 
@@ -146,6 +153,43 @@ namespace sh {
                     }
                 }
             }
+            
+            inline static const std::map<std::string, std::pair<u8,u8>> REGEX_GRAMMAR = {
+                {R"B09OPA3(#\$[\da-f]+)B09OPA3",                {CPU::ADDRESS_MODES::IMM,HEX}},          
+                {R"B09OPA3(#\d+)B09OPA3",                       {CPU::ADDRESS_MODES::IMM,DEC}},
+                {R"B09OPA3(\$[\da-f]+)B09OPA3",                 {CPU::ADDRESS_MODES::ABS,HEX}},          
+                {R"B09OPA3(\$[\da-f]+,B)B09OPA3",               {CPU::ADDRESS_MODES::ABB,HEX}},        
+                {R"B09OPA3(\$[\da-f]+,C)B09OPA3",               {CPU::ADDRESS_MODES::ABC,HEX}},
+                {R"B09OPA3(\d+)B09OPA3",                        {CPU::ADDRESS_MODES::ABS,DEC}},
+                {R"B09OPA3(\d+,B)B09OPA3",                      {CPU::ADDRESS_MODES::ABB,DEC}},
+                {R"B09OPA3(\d+,C)B09OPA3",                      {CPU::ADDRESS_MODES::ABC,DEC}},
+                {R"B09OPA3(@[a-z][a-z_0-9]+)B09OPA3",           {CPU::ADDRESS_MODES::ABS,VAR}},        
+                {R"B09OPA3(@[a-z][a-z_0-9]+,B)B09OPA3",         {CPU::ADDRESS_MODES::ABB,VAR}},
+                {R"B09OPA3(@[a-z][a-z_0-9]+,C)B09OPA3",         {CPU::ADDRESS_MODES::ABC,VAR}},
+                {R"B09OPA3([a-z][a-z_0-9]+)B09OPA3",            {CPU::ADDRESS_MODES::ABS,LBL}},
+                {R"B09OPA3([a-z][a-z_0-9]+,B)B09OPA3",          {CPU::ADDRESS_MODES::ABB,LBL}},
+                {R"B09OPA3([a-z][a-z_0-9]+,C)B09OPA3",          {CPU::ADDRESS_MODES::ABC,LBL}},
+                {R"B09OPA3(\(\$[\da-f]+\))B09OPA3",             {CPU::ADDRESS_MODES::IND,HEX}},
+                {R"B09OPA3(\(\$[\da-f]+,B\))B09OPA3",           {CPU::ADDRESS_MODES::INB,HEX}},
+                {R"B09OPA3(\(\$[\da-f]+\),C)B09OPA3",           {CPU::ADDRESS_MODES::INC,HEX}},
+                {R"B09OPA3(\(\d+\))B09OPA3",                    {CPU::ADDRESS_MODES::ABS,DEC}},
+                {R"B09OPA3(\(\d+,B\))B09OPA3",                  {CPU::ADDRESS_MODES::ABB,DEC}},
+                {R"B09OPA3(\(\d+\),C)B09OPA3",                  {CPU::ADDRESS_MODES::ABC,DEC}},
+                {R"B09OPA3(\(@[a-z][a-z_0-9]+\))B09OPA3",       {CPU::ADDRESS_MODES::ABS,VAR}},        
+                {R"B09OPA3(\(@[a-z][a-z_0-9]+,B\))B09OPA3",     {CPU::ADDRESS_MODES::ABB,VAR}},
+                {R"B09OPA3(\(@[a-z][a-z_0-9]+\),C)B09OPA3",     {CPU::ADDRESS_MODES::ABC,VAR}},
+                {R"B09OPA3(\([a-z][a-z_0-9]+\))B09OPA3",        {CPU::ADDRESS_MODES::ABS,LBL}},
+                {R"B09OPA3(\([a-z][a-z_0-9]+,B\)B09OPA3",       {CPU::ADDRESS_MODES::ABB,LBL}},
+                {R"B09OPA3(\([a-z][a-z_0-9]+\),C)B09OPA3",      {CPU::ADDRESS_MODES::ABC,LBL}},
+                {R"B09OPA3([ABCXYZ],[ABCXYZ])B09OPA3",          {CPU::ADDRESS_MODES::RG2,REG}},
+                {R"B09OPA3(A)B09OPA3",                          {CPU::ADDRESS_MODES::RGA,REG}},
+                {R"B09OPA3(B)B09OPA3",                          {CPU::ADDRESS_MODES::RGB,REG}},
+                {R"B09OPA3(C)B09OPA3",                          {CPU::ADDRESS_MODES::RGC,REG}},
+                {R"B09OPA3(X)B09OPA3",                          {CPU::ADDRESS_MODES::RGX,REG}},
+                {R"B09OPA3(Y)B09OPA3",                          {CPU::ADDRESS_MODES::RGY,REG}},
+                {R"B09OPA3(Z)B09OPA3",                          {CPU::ADDRESS_MODES::RGZ,REG}},
+            
+            };
 
 
     };

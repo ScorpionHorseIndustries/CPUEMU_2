@@ -1,0 +1,38 @@
+#\$[\da-f]+                 *** IMM,HEX          
+#\d+                        *** IMM,DEC
+\$[\da-f]+                  *** ABS,HEX          
+\$[\da-f]+,B                *** ABB,HEX        
+\$[\da-f]+,C                *** ABC,HEX
+\d+                         *** ABS,DEC
+\d+,B                       *** ABB,DEC
+\d+,C                       *** ABC,DEC
+@[a-z][a-z_0-9]+            *** ABS,VAR        
+@[a-z][a-z_0-9]+,B          *** ABB,VAR
+@[a-z][a-z_0-9]+,C          *** ABC,VAR
+[a-z][a-z_0-9]+             *** ABS,LBL
+[a-z][a-z_0-9]+,B           *** ABB,LBL
+[a-z][a-z_0-9]+,C           *** ABC,LBL
+\(\$[\da-f]+\)              *** IND,HEX
+\(\$[\da-f]+,B\)            *** INB,HEX
+\(\$[\da-f]+\),C            *** INC,HEX
+\(\d+\)                     *** ABS,DEC
+\(\d+,B\)                   *** ABB,DEC
+\(\d+\),C                   *** ABC,DEC
+\(@[a-z][a-z_0-9]+\)        *** ABS,VAR        
+\(@[a-z][a-z_0-9]+,B\)      *** ABB,VAR
+\(@[a-z][a-z_0-9]+\),C      *** ABC,VAR
+\([a-z][a-z_0-9]+\)         *** ABS,LBL
+\([a-z][a-z_0-9]+,B\)       *** ABB,LBL
+\([a-z][a-z_0-9]+\),C       *** ABC,LBL
+[ABCXYZ],[ABCXYZ]           *** RG2,REG
+A                           *** RGA,REG
+B                           *** RGB,REG
+C                           *** RGC,REG
+X                           *** RGX,REG
+Y                           *** RGY,REG
+Z                           *** RGZ,REG
+
+
+
+
+

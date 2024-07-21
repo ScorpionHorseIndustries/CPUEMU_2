@@ -76,6 +76,7 @@ namespace sh {
                 RIY,
                 RIZ,
             };
+
             //registers
             u16 A,B,C,X,Y,Z;
             u32 temp;
@@ -294,7 +295,24 @@ namespace sh {
                 { FFCL, "Flag F Clear"},
             };
 
+            inline static const std::map<char, u8> REGISTER_NAMES = {
+                { 'A', RIA },
+                { 'B', RIB },
+                { 'C', RIC },
+                { 'X', RIX },
+                { 'Y', RIY },
+                { 'Z', RIZ },
+            };
 
+            inline static const std::map<u8, u8> MAP_REGISTER_INDEX_TO_ADDRESS_MODE = {
+                {RIA, RGA },
+                {RIB, RGB },
+                {RIC, RGC },
+                {RIX, RGX },
+                {RIY, RGY },
+                {RIZ, RGZ },
+            
+            };
             inline static const std::map<std::string, u8> INSTRUCTIONS_BY_NAME = {
                 { "ADDC", ADDC },
                 { "SUBC", SUBC },
