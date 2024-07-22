@@ -20,21 +20,21 @@ namespace sh {
         // }
 
         //write a program
-        mwAddress = 0;
+        // mwAddress = 0;
 
-        u16 loop_address = 0;
-        mwWrite(LODA, IMM, 0);
-        mwWrite(STRA, ABS, CPU_RAM_START);
-        loop_address = mwAddress;
-        mwWrite(LODA, ABS, CPU_RAM_START);
-        mwWrite(INCR, RGA);
-        mwWrite(STRA, ABS, CPU_RAM_START);
-        mwWrite(FCST);
-        mwWrite(SUBC, IMM, 3);
-        mwWrite(FCCL);
-        mwWrite(JMPZ, ABS, mwAddress+4);
-        mwWrite(JUMP, ABS, loop_address);
-        mwWrite(HALT);
+        // u16 loop_address = 0;
+        // mwWrite(LODA, IMM, 0);
+        // mwWrite(STRA, ABS, CPU_RAM_START);
+        // loop_address = mwAddress;
+        // mwWrite(LODA, ABS, CPU_RAM_START);
+        // mwWrite(INCR, RGA);
+        // mwWrite(STRA, ABS, CPU_RAM_START);
+        // mwWrite(FCST);
+        // mwWrite(SUBC, IMM, 3);
+        // mwWrite(FCCL);
+        // mwWrite(JMPZ, ABS, mwAddress+4);
+        // mwWrite(JUMP, ABS, loop_address);
+        // mwWrite(HALT);
 
         
 
@@ -64,8 +64,10 @@ namespace sh {
         PC = 0;
 
         std::cout << "MEMORY" << std::endl;
-        for (int i = 0; i < 30; i += 1) {
-            std::cout << std::format("{:4} {:04x}", i, memory[i]) << std::endl;
+        for (int i = 0; i < memory.size(); i += 1) {
+            if (memory[i] > 0) {
+                std::cout << std::format("{:04x} {:04x}", i, memory[i]) << std::endl;
+            }
         }
 
 
@@ -110,6 +112,10 @@ namespace sh {
         address_absolute = 0;
         u16 which_registers = 0;
         
+        memory[CPU_RAND_01] = ((rand() & 0xff) << 8) | (rand() & 0xff);
+        memory[CPU_RAND_02] = ((rand() & 0xff) << 8) | (rand() & 0xff);
+        memory[CPU_RAND_03] = ((rand() & 0xff) << 8) | (rand() & 0xff);
+        memory[CPU_RAND_04] = ((rand() & 0xff) << 8) | (rand() & 0xff);
 
         src_reg = nullptr;
         dst_reg = nullptr;

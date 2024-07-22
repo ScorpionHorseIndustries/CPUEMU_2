@@ -19,8 +19,28 @@ int main(int argc, char* argv[]) {
         }
         if (ok) {
             assembler.PrintTokenLines();
+           
         } else {
             std::cout << "failed to tokenise [" << file_name << "]" << std::endl;
+        }
+        if (ok) {
+            ok = assembler.Assemble();
+        } else {
+            std::cout << "failed to assemble [" << file_name << "]" << std::endl;
+        }
+        for (auto& out : assembler.outputLines) {
+            std::cout << 
+                std::format("[{:04x}]{:02x}{:02x} Length[{}] Value[{:04x}] DL[{:5}] LB[{:5}] VR[{:5}] LABEL[{}]", 
+                    out.address,
+                    out.instruction, 
+                    out.address_mode,
+                    out.length,
+                    out.value,
+                    out.isDeclareLabel,
+                    out.valueIsLabel,
+                    out.valueIsVar,
+                    out.label
+                    ) << std::endl;
         }
         // while (!cpu.flags.HALT) {
         //     cpu.Tick();

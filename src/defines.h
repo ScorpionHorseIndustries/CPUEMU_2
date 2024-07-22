@@ -26,12 +26,16 @@ typedef double          f64;
 
 namespace sh {
     constexpr int CPU_MEMORY_SIZE = 0x10000;
-    constexpr int CPU_LAST_INDEX  = 0x0ffff;
-    constexpr int CPU_VRAM_START  = 0x0bfff;
-    constexpr int CPU_STACK_START = CPU_VRAM_START - 0x100;
+    constexpr int CPU_LAST_INDEX  = 0xffff;
+    constexpr int CPU_VRAM_START  = 0xbfff;
+    constexpr int CPU_STACK_START = CPU_VRAM_START - 0x200;
 
     constexpr int CPU_ROM_START   = 0x0000;
     constexpr int CPU_RAM_START   = 0x8000;
+    constexpr int CPU_RAND_01     = 0xbffb;
+    constexpr int CPU_RAND_02     = CPU_RAND_01+1;
+    constexpr int CPU_RAND_03     = CPU_RAND_02+1;
+    constexpr int CPU_RAND_04     = CPU_RAND_03+1;
 
 
 }

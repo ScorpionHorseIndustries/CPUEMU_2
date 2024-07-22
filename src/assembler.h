@@ -33,13 +33,14 @@ namespace sh {
 
     class Assembler {
         private:
-                     
+            std::string input_file_path;
+            std::string output_file_path;
         public:
             Assembler() {
             }
             enum TOKEN_TYPE : u8 {
                 NONE                = 0,
-                TEXT                ,
+                // TEXT                ,
                 NUMERIC_LITERAL     ,
                 INDIRECT_ADDRESS    ,
                 ADDRESS_LITERAL     ,
@@ -49,6 +50,7 @@ namespace sh {
                 LABEL_DECLARE       ,
                 REGISTER            ,
                 REGISTER_PAIR       ,
+                OTHER               ,
                 INVALID             = 0xff,
 
             };
@@ -58,12 +60,12 @@ namespace sh {
                 DEC,
                 LBL,
                 VAR,
-                REG
+                REG,
+                RGP     //register pair
             };
             
             inline static const std::map<u8, std::string> TOKEN_TYPE_NAMES = {
                 { NONE                  , "NONE"                    },
-                { TEXT                  , "TEXT"                    },
                 { NUMERIC_LITERAL       , "NUMERIC_LITERAL"         },
                 { INDIRECT_ADDRESS      , "INDIRECT_ADDRESS"        },
                 { ADDRESS_LITERAL       , "ADDRESS_LITERAL"         },
@@ -73,6 +75,7 @@ namespace sh {
                 { LABEL_DECLARE         , "LABEL_DECLARE"           },
                 { REGISTER              , "REGISTER"                },
                 { REGISTER_PAIR         , "REGISTER_PAIR"           },
+                { OTHER                 , "OTHER"                   },
                 { INVALID               , "INVALID"                 },
                
                
@@ -84,7 +87,7 @@ namespace sh {
                 u8 sub_value_type;
                 int value_int = 0;
                 // std::string labelvar_name;
-                int registerFrom = 0, registerTo = 0;
+                u8 registerFrom = 0, registerTo = 0;
                 Token(std::string _value, TOKEN_TYPE _type);
                 u8 address_mode = 0;
                  
@@ -92,25 +95,23 @@ namespace sh {
             };
 
             struct Output {
-                bool        isLabel         = 0;
+                bool        isDeclareLabel  = false;
+                bool        valueIsLabel    = false;
+                bool        valueIsVar      = false;
+
                 u16         opcode          = 0;
                 u8          instruction     = 0;
                 u8          address_mode    = 0;
                 u8          length          = 0;
                 u16         address         = 0;
                 u16         value           = 0;
-                std::string label              ;
-
-
-            
+                std::string label           = "";
             };
+            std::vector<Output> outputLines;
             
-
             struct TokenLine {
                 std::string line;
                 std::vector<Token> tokens;
-
-
             };
 
             
@@ -132,62 +133,69 @@ namespace sh {
             };
             std::map<std::string, Label> Labels;
 
-
-            
-
-
+            bool ParseFromFile(std::string input_path, std::string output_path);
             bool LoadFile(std::string path);
             bool Tokenise();
             bool Assemble();
             std::vector<Token> Tokenise(const std::string& ln);
             bool LabelExists(std::string lbl);
-            Label LabelGet(std::string lbl);
+            Label& LabelGet(std::string lbl);
             void LabelSet(std::string lbl, u16 address, bool isVar = false);
-
+            std::vector<u16> bytes;
+            
      
             void PrintTokenLines() {
+                std::cout << "Print token Lines:" << std::endl;
                 for (const auto& tl : lines) {
                     std::cout << tl.line << std::endl;
                     for (const auto& t : tl.tokens) {
                         std::cout << "\t" << t.str() << std::endl;
                     }
                 }
+                std::cout << "End Print token Lines" << std::endl;
             }
+
+            struct RegexGrammarToken {
+                std::regex  rgx;
+                TOKEN_TYPE  token_type;
+                u8          address_mode;
+                u8          sub_value_type;
+            };
             
-            inline static const std::map<std::string, std::pair<u8,u8>> REGEX_GRAMMAR = {
-                {R"B09OPA3(#\$[\da-f]+)B09OPA3",                {CPU::ADDRESS_MODES::IMM,HEX}},          
-                {R"B09OPA3(#\d+)B09OPA3",                       {CPU::ADDRESS_MODES::IMM,DEC}},
-                {R"B09OPA3(\$[\da-f]+)B09OPA3",                 {CPU::ADDRESS_MODES::ABS,HEX}},          
-                {R"B09OPA3(\$[\da-f]+,B)B09OPA3",               {CPU::ADDRESS_MODES::ABB,HEX}},        
-                {R"B09OPA3(\$[\da-f]+,C)B09OPA3",               {CPU::ADDRESS_MODES::ABC,HEX}},
-                {R"B09OPA3(\d+)B09OPA3",                        {CPU::ADDRESS_MODES::ABS,DEC}},
-                {R"B09OPA3(\d+,B)B09OPA3",                      {CPU::ADDRESS_MODES::ABB,DEC}},
-                {R"B09OPA3(\d+,C)B09OPA3",                      {CPU::ADDRESS_MODES::ABC,DEC}},
-                {R"B09OPA3(@[a-z][a-z_0-9]+)B09OPA3",           {CPU::ADDRESS_MODES::ABS,VAR}},        
-                {R"B09OPA3(@[a-z][a-z_0-9]+,B)B09OPA3",         {CPU::ADDRESS_MODES::ABB,VAR}},
-                {R"B09OPA3(@[a-z][a-z_0-9]+,C)B09OPA3",         {CPU::ADDRESS_MODES::ABC,VAR}},
-                {R"B09OPA3([a-z][a-z_0-9]+)B09OPA3",            {CPU::ADDRESS_MODES::ABS,LBL}},
-                {R"B09OPA3([a-z][a-z_0-9]+,B)B09OPA3",          {CPU::ADDRESS_MODES::ABB,LBL}},
-                {R"B09OPA3([a-z][a-z_0-9]+,C)B09OPA3",          {CPU::ADDRESS_MODES::ABC,LBL}},
-                {R"B09OPA3(\(\$[\da-f]+\))B09OPA3",             {CPU::ADDRESS_MODES::IND,HEX}},
-                {R"B09OPA3(\(\$[\da-f]+,B\))B09OPA3",           {CPU::ADDRESS_MODES::INB,HEX}},
-                {R"B09OPA3(\(\$[\da-f]+\),C)B09OPA3",           {CPU::ADDRESS_MODES::INC,HEX}},
-                {R"B09OPA3(\(\d+\))B09OPA3",                    {CPU::ADDRESS_MODES::ABS,DEC}},
-                {R"B09OPA3(\(\d+,B\))B09OPA3",                  {CPU::ADDRESS_MODES::ABB,DEC}},
-                {R"B09OPA3(\(\d+\),C)B09OPA3",                  {CPU::ADDRESS_MODES::ABC,DEC}},
-                {R"B09OPA3(\(@[a-z][a-z_0-9]+\))B09OPA3",       {CPU::ADDRESS_MODES::ABS,VAR}},        
-                {R"B09OPA3(\(@[a-z][a-z_0-9]+,B\))B09OPA3",     {CPU::ADDRESS_MODES::ABB,VAR}},
-                {R"B09OPA3(\(@[a-z][a-z_0-9]+\),C)B09OPA3",     {CPU::ADDRESS_MODES::ABC,VAR}},
-                {R"B09OPA3(\([a-z][a-z_0-9]+\))B09OPA3",        {CPU::ADDRESS_MODES::ABS,LBL}},
-                {R"B09OPA3(\([a-z][a-z_0-9]+,B\)B09OPA3",       {CPU::ADDRESS_MODES::ABB,LBL}},
-                {R"B09OPA3(\([a-z][a-z_0-9]+\),C)B09OPA3",      {CPU::ADDRESS_MODES::ABC,LBL}},
-                {R"B09OPA3([ABCXYZ],[ABCXYZ])B09OPA3",          {CPU::ADDRESS_MODES::RG2,REG}},
-                {R"B09OPA3(A)B09OPA3",                          {CPU::ADDRESS_MODES::RGA,REG}},
-                {R"B09OPA3(B)B09OPA3",                          {CPU::ADDRESS_MODES::RGB,REG}},
-                {R"B09OPA3(C)B09OPA3",                          {CPU::ADDRESS_MODES::RGC,REG}},
-                {R"B09OPA3(X)B09OPA3",                          {CPU::ADDRESS_MODES::RGX,REG}},
-                {R"B09OPA3(Y)B09OPA3",                          {CPU::ADDRESS_MODES::RGY,REG}},
-                {R"B09OPA3(Z)B09OPA3",                          {CPU::ADDRESS_MODES::RGZ,REG}},
+            inline static const std::vector<RegexGrammarToken> REGEX_GRAMMAR = {
+                { std::regex( R"rgx987(#\$[\dA-Fa-f]+)rgx987"                  ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, HEX },          
+                { std::regex( R"rgx987(#\d+)rgx987"                            ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, DEC },
+                { std::regex( R"rgx987(\$[\dA-Fa-f]+)rgx987"                   ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, HEX },          
+                { std::regex( R"rgx987(\$[\dA-Fa-f]+,B)rgx987"                 ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, HEX },        
+                { std::regex( R"rgx987(\$[\dA-Fa-f]+,C)rgx987"                 ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, HEX },
+                { std::regex( R"rgx987(\d+)rgx987"                             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, DEC },
+                { std::regex( R"rgx987(\d+,B)rgx987"                           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, DEC },
+                { std::regex( R"rgx987(\d+,C)rgx987"                           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, DEC },
+                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+)rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
+                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+,B)rgx987"        ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
+                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+,C)rgx987"        ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
+                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+)rgx987"           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
+                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+,B)rgx987"         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
+                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+,C)rgx987"         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
+                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+\))rgx987"               ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::IND, HEX },
+                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+,B\))rgx987"             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INB, HEX },
+                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+\),C)rgx987"             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INC, HEX },
+                { std::regex( R"rgx987(\(\d+\))rgx987"                         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, DEC },
+                { std::regex( R"rgx987(\(\d+,B\))rgx987"                       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, DEC },
+                { std::regex( R"rgx987(\(\d+\),C)rgx987"                       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, DEC },
+                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+\))rgx987"      ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
+                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+,B\))rgx987"    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
+                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+\),C)rgx987"    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
+                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+\))rgx987"       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
+                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+,B\))rgx987"     ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
+                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+\),C)rgx987"     ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
+                { std::regex( R"rgx987([ABCXYZ],[ABCXYZ])rgx987"               ,std::regex::icase), REGISTER_PAIR  , CPU::ADDRESS_MODES::RG2, RGP },
+                { std::regex( R"rgx987(A)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGA, REG },
+                { std::regex( R"rgx987(B)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGB, REG },
+                { std::regex( R"rgx987(C)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGC, REG },
+                { std::regex( R"rgx987(X)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGX, REG },
+                { std::regex( R"rgx987(Y)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGY, REG },
+                { std::regex( R"rgx987(Z)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGZ, REG },
             
             };
 

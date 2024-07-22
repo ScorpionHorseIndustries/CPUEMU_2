@@ -16,7 +16,6 @@ namespace sh {
         
     }
 
-
     void Assembler::tk_advance() {
         if (tk_cursor >= tk_current_string.length()) {
             tk_finished = true;
@@ -31,8 +30,10 @@ namespace sh {
     }
 
     bool Assembler::Assemble() {
-        std::vector<Output> output;
+        // std::vector<Output> outputLines;
+        outputLines.clear();
         u16 byte_position = 0;
+        u16 var_counter = 0;
         for (auto& tl : lines) {
             Token* first = &tl.tokens[0];
             Token* second = nullptr;
@@ -40,35 +41,111 @@ namespace sh {
                 second = &tl.tokens[1];
             }
 
+            if (first->type == INVALID) {
+                throw std::runtime_error("invalid token");
+            }
+
             if (first->type == KEYWORD) {
                 Output out;
                 out.instruction = CPU::GetInstructionCode(first->value);
-                out.address = byte_position;
 
                 if (second == nullptr) {
                     out.address_mode = CPU::ADDRESS_MODES::IMP;
                 } else {
+                    if (second->type == INVALID) {
+                        throw std::runtime_error("invalid token");
+                    }
                     out.address_mode = second->address_mode;
-                    
-                    
+
+                    if (second->sub_value_type == VAR) {
+                        out.valueIsVar = true;
+                        if (!LabelExists(second->sub_value)) {
+                            out.label = second->sub_value;
+                            out.value = CPU_RAM_START+var_counter;
+                            LabelSet(second->sub_value, out.value,true);
+                            var_counter += 1;
+                        } else {
+                            auto& label = LabelGet(second->sub_value);
+                            out.value = label.address;
+                        }
+                    }  else if (second->sub_value_type == LBL) {
+                        out.label = second->sub_value;
+                        out.valueIsLabel = true;
+                        out.value = 0;
+                    } else {
+                        out.value = second->value_int;
+                    }
                 }
+                out.address = byte_position;
+                out.length = CPU::ADDRESS_MODE_LENGTH.at(out.address_mode);
+                byte_position += out.length;
+                outputLines.push_back(out);
 
 
 
             } else if (first->type == LABEL_DECLARE) {
                 Output out;
                 out.label = first->value;
-                out.isLabel = true;
-                output.push_back(out);
+                out.isDeclareLabel = true;
+                out.length = 0;
+                out.address = byte_position;
+                LabelSet(out.label,out.address,false);
+                
+                outputLines.push_back(out);
             } else {
                 //error
+                throw std::runtime_error("incorrect type encountered:\n" + tl.line);
+            }
+        }
+
+
+        for (int i = 0; i < outputLines.size(); i += 1) {
+            auto& out = outputLines[i];
+            if (out.isDeclareLabel) {
+                for (int j = i + 1; j < outputLines.size(); j += 1) {
+                    auto& next = outputLines[j];
+                    if (next.instruction > 0) {
+                        out.address = next.address;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < outputLines.size(); i += 1) {
+            auto& out = outputLines[i];
+
+            if (out.valueIsLabel) {
+                out.value = LabelGet(out.label).address;
             }
 
+            if (out.instruction > 0) {
+                bytes.push_back(CPU::EncodeOpcode(out.instruction, out.address_mode));
+                if (out.length > 1) {
+                    bytes.push_back(out.value);
+                }
+            }
+        }
+
+        std::ofstream file;
+        file.open(".\\programs\\out.faux", std::ios::out | std::ios_base::binary);
+        if (!file.is_open()) throw std::runtime_error("file not open");
+
+        for (auto b : bytes) {
+            u8 bts[2];
+            bts[0] = (b >> 8) & 0xff;
+            bts[1] = b & 0xff;
+            file.write((char*) &bts,2);
 
         }
-        return (output.size() > 0);
+        file.flush();
+        file.close();
+
+        
+        return (outputLines.size() > 0);
     
     }
+
     std::vector<Assembler::Token> Assembler::Tokenise(const std::string& ln) {
         std::vector<Token> tokens;
 
@@ -99,12 +176,19 @@ namespace sh {
                     tokens.push_back({elements[0], KEYWORD});
                 } else {
                     //fucken error, innit
+                    tokens.push_back({elements[0], INVALID});
                 }
             }
         } else if (elements.size() == 2) {
+            if (CPU::GetInstructionCode(elements[0]) > 0) {
+                tokens.push_back({elements[0], KEYWORD});
+            } else {
+                // error
+                tokens.push_back({elements[0], INVALID});
+            }
 
+            tokens.push_back({elements[1], OTHER});
         }
-
 
         return tokens;
     }
@@ -127,16 +211,14 @@ namespace sh {
                 TokenLine tl;
                 tl.line = ln;
                 tl.tokens = Tokenise(ln);
-                lines.push_back(tl);
+
+                if (tl.tokens.size() > 0) {
+                    lines.push_back(tl);
+                }
 
                 
             }
-
-
-
-
         }
-
         return lines.size() > 0;
     }
 
@@ -151,16 +233,17 @@ namespace sh {
         bool readDec = true;
         sub_value = "";
 
-        for (auto& [rgx_string, adrm_type_pair] : REGEX_GRAMMAR) {
-        
-            std::regex rgx(rgx_string, std::regex_constants::icase);
 
-            if (std::regex_match(value, rgx)) {
-                address_mode = adrm_type_pair.first;
-                sub_value_type = adrm_type_pair.second;
-                break;
-            }
-        }    
+        if (type == OTHER) {
+            for (auto& grammar : REGEX_GRAMMAR) {
+                if (std::regex_match(value, grammar.rgx)) {
+                    type            = grammar.token_type;
+                    address_mode    = grammar.address_mode;
+                    sub_value_type  = grammar.sub_value_type;
+                    break;
+                }
+            }    
+        }
 
 
         if (sub_value_type == HEX || sub_value_type == DEC) {
@@ -200,14 +283,21 @@ namespace sh {
         if (address_mode == CPU::ADDRESS_MODES::RG2) {
             registerFrom = CPU::REGISTER_NAMES.at(value[0]);
             registerTo = CPU::REGISTER_NAMES.at(value[2]);
+            value_int = CPU::MakeReg2(registerFrom, registerTo);
         }
 
-
+        if (value_int > 0xffff || value_int < 0) {
+            throw std::runtime_error(
+                    std::format("INT [{}] out of range", value_int)
+                );
+        }
+        //if we get down here and it's still "other",
+        //then it's invalid
+        if (type == OTHER) {
+            type = INVALID;
+        }
 
         
-
-        
-
 
     }
 
@@ -215,7 +305,7 @@ namespace sh {
         std::string k = GetKey(lbl);
         return Labels.contains(k);
     }
-    Assembler::Label Assembler::LabelGet(std::string lbl) { 
+    Assembler::Label& Assembler::LabelGet(std::string lbl) { 
         std::string k = GetKey(lbl);
         if (LabelExists(lbl)) {
             return Labels[k];

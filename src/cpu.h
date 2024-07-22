@@ -103,7 +103,7 @@ namespace sh {
             void mwWrite(u8 instruction, u8 address_mode = ADDRESS_MODES::IMP, u16 arg = 0);
             static u16 EncodeOpcode(u8 _instr, u8 _addr_mode);
             static void DecodeOpcode(u16 _opcode, u8* _out_instr_ptr, u8* _out_am_ptr);
-            u16 MakeReg2(u8 _from, u8 to);
+            static u16 MakeReg2(u8 _from, u8 to);
             std::string str();
             
 
