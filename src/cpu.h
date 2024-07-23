@@ -104,6 +104,8 @@ namespace sh {
             static u16 EncodeOpcode(u8 _instr, u8 _addr_mode);
             static void DecodeOpcode(u16 _opcode, u8* _out_instr_ptr, u8* _out_am_ptr);
             static u16 MakeReg2(u8 _from, u8 to);
+            bool LoadProgram(std::string path);
+            void PrintNonZeroMemory();
             std::string str();
             
 
@@ -304,6 +306,15 @@ namespace sh {
                 { 'Z', RIZ },
             };
 
+            inline static const std::map<u8, char> REGISTER_NAMES_BY_INDEX = {
+                { RIA,'A' },
+                { RIB,'B' },
+                { RIC,'C' },
+                { RIX,'X' },
+                { RIY,'Y' },
+                { RIZ,'Z' },
+            };
+
             inline static const std::map<u8, u8> MAP_REGISTER_INDEX_TO_ADDRESS_MODE = {
                 {RIA, RGA },
                 {RIB, RGB },
@@ -351,6 +362,18 @@ namespace sh {
                 { "FVCL", FVCL },
                 { "FFCL", FFCL },
             };     
+
+            inline static const std::map<u16, std::string> SPECIAL_ADDRESSES = {
+                { CPU_VRAM_START  , "VRAM" },
+                { CPU_STACK_START , "STCK" },
+                { CPU_ROM_START   , "ROM" },
+                { CPU_RAM_START   , "RAM" },
+                { CPU_RAND_01     , "RND1" },
+                { CPU_RAND_02     , "RND2" },
+                { CPU_RAND_03     , "RND3" },
+                { CPU_RAND_04     , "RND4" },
+
+            };
 
 
             inline static std::string GetInstructionName(u8 __instr) {

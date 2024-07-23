@@ -62,18 +62,76 @@ namespace sh {
         // mwWrite(HALT, IMP);             //18
         
         PC = 0;
+    }
 
+    void CPU::PrintNonZeroMemory() {
         std::cout << "MEMORY" << std::endl;
+        std::cout << "| TYPE   | ADDR   | VALUE  |" << std::endl;
+        std::cout << "|--------|--------|--------|" << std::endl;
+        for (int i = 0; i < regPointers.size() ; i += 1) {
+            auto reg = regPointers[i];
+            auto name = REGISTER_NAMES_BY_INDEX.at(i);
+
+            std::cout << std::format("| REG    | {:1}      | {:04x}   |", name, *reg) << std::endl;
+            
+        }
+        std::cout << "|--------|--------|--------|" << std::endl;
+
         for (int i = 0; i < memory.size(); i += 1) {
-            if (memory[i] > 0) {
-                std::cout << std::format("{:04x} {:04x}", i, memory[i]) << std::endl;
+            bool print = memory[i] > 0;
+            std::string name = "MEM";
+            if (SPECIAL_ADDRESSES.contains(i)) {
+                name = SPECIAL_ADDRESSES.at(i);
+                print = true;
             }
+            if (print) {
+                std::cout << std::format("| {:5}  | {:04x}   | {:04x}   |", name, i, memory[i]) << std::endl;
+            }
+        }
+    }
+
+
+    u16 CPU::MakeReg2(u8 _from, u8 to) {
+        return (_from << 8) | (to&0xff);
+    }
+
+    bool CPU::LoadProgram(std::string path) {
+        bool ok = true;
+
+
+        std::ifstream file(path, std::ifstream::binary);
+        if (file.is_open()) {
+
+            file.seekg(0, file.end);
+            int length = file.tellg();
+            file.seekg(0, file.beg);
+
+            char* buffer = new char[length];
+            file.read(buffer, length);
+
+            if (file) {
+
+                int mem_position = 0;
+                for (int i = 0; i < length; i += 2) {
+                    memory[mem_position] = ((buffer[i]&0xff)<<8) | (buffer[i+1]&0xff);
+                    mem_position += 1;
+                }
+            } else {
+                std::cout << "only" << file.gcount() << " bytes could be read " << std::endl;
+                ok = false;
+            }
+
+            delete[] buffer;
+            PrintNonZeroMemory();
+        } else {
+            std::cout << "file could not be opened" << std::endl;
+            ok = false;
         }
 
 
-    }
-    u16 CPU::MakeReg2(u8 _from, u8 to) {
-        return (_from << 8) | (to&0xff);
+
+        return ok;
+
     }
 
     std::string CPU::str() {

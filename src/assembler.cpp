@@ -1,6 +1,31 @@
 #include "common.h"
 
 namespace sh {
+
+    bool Assembler::ParseFromFile(std::string input_path, std::string output_path) {
+        input_file_path = input_path;
+        output_file_path = output_path;
+
+        bool ok = LoadFile(input_file_path);
+        if (ok) {
+            ok = Tokenise();
+        }
+
+        if (ok) {
+            ok = Assemble();
+        }
+
+        if (ok) {
+            std::cout << "OK!" << std::endl;
+        }  else {
+            std::cout << "FAILED!" << std::endl;
+        }
+
+
+
+        return ok;
+    }
+
     bool Assembler::LoadFile(std::string path) {
         std::ifstream file(path);
         if (file.is_open()) {
@@ -128,7 +153,7 @@ namespace sh {
         }
 
         std::ofstream file;
-        file.open(".\\programs\\out.faux", std::ios::out | std::ios_base::binary);
+        file.open(output_file_path, std::ios::out | std::ios_base::binary);
         if (!file.is_open()) throw std::runtime_error("file not open");
 
         for (auto b : bytes) {
