@@ -5,8 +5,8 @@ STRA @counter
 loop:
     LODA @counter
     FCST 
-    SUBC #0
-    JMPZ end
+    COMP #0
+    JMPE end
     JSUB dec_a
     JUMP loop
     

@@ -8,6 +8,7 @@ namespace sh {
         instruction = 0;
         address_absolute = 0;
         address_mode = 0;
+        stackPointer = 0;
 
         // for (auto [instr,amlist] : VALID_OPCODES_LOOKUP) {
             
@@ -149,19 +150,25 @@ namespace sh {
         output += std::format(" 2[{:04x}]", memory[CPU_RAM_START+2]);
         output += std::format(" 3[{:04x}]", memory[CPU_RAM_START+3]);
 
-        output += " F[";
-        output += flags.CARRY       ? "C" : "-";
-        output += flags.NEGATIVE    ? "N" : "-";
-        output += flags.ZERO        ? "Z" : "-";
-        output += flags.OVERFLOW    ? "V" : "-";
-        output += flags.FLOAT       ? "F" : "-";
-        output += flags.HALT        ? "H" : "-";
-        output += "]";
+        output += " F[" + GetFlagString() + "]";
 
         
         return output;
     }
+    std::string CPU::GetFlagString() {
+        std::string output = "";
+        output +=  (flags.CARRY         ? "C" : "-");
+        output +=  (flags.NEGATIVE      ? "N" : "-");
+        output +=  (flags.ZERO          ? "Z" : "-");
+        output +=  (flags.LESS_THAN     ? "L" : "-");
+        output +=  (flags.GREATER_THAN  ? "G" : "-");
+        output +=  (flags.EQUAL         ? "E" : "-");
+        output +=  (flags.OVERFLOW      ? "V" : "-");
+        output +=  (flags.HALT          ? "H" : "-");
+        output +=  (flags.FLOAT         ? "F" : "-");
 
+        return output;
+    }
 
     void CPU::Tick() {
         instruction = 0;
@@ -188,7 +195,9 @@ namespace sh {
         PC += 1;
 
         std::string current_opcode_name = GetOpcodeFullName(instruction, address_mode);
-        std::cout << std::format("BEGIN PC[{:04x}] {} FE[{:02x}]", PC, current_opcode_name, fetched) << str() << std::endl;
+        if (debug_output) {
+            std::cout << std::format("BEGIN PC[{:04x}] {} FE[{:02x}]", PC, current_opcode_name, fetched) << str() << std::endl;
+        }
         
 
 
@@ -307,6 +316,13 @@ namespace sh {
                 A = temp & 0xffff;            
                 break;
             }
+            case COMP: {
+                Fetch();
+                flags.EQUAL = A == fetched;
+                flags.LESS_THAN = A < fetched;
+                flags.GREATER_THAN = A > fetched;
+                break;
+            }
             case INCR: {
                 if (dst_reg != nullptr) {
                     temp = ((u32)*dst_reg) + (u32)1;
@@ -356,6 +372,20 @@ namespace sh {
                 A = A ^ fetched;
                 flags.ZERO = temp & 0xffff == 0;
                 flags.NEGATIVE = temp & 0x8000 != 0;                            
+                break;
+            }
+            case BSHL: {
+                Fetch();
+                A = A << (fetched & 0xf);
+                flags.ZERO = temp & 0xffff == 0;
+                flags.NEGATIVE = temp & 0x8000 != 0;                                            
+                break;
+            }
+            case BSHR: {
+                Fetch();
+                A = A >> (fetched & 0xf);
+                flags.ZERO = A == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;   
                 break;
             }
             case PUSH: {
@@ -435,6 +465,25 @@ namespace sh {
                 }            
                 break;
             }
+
+            case JMPL: {
+                if (flags.LESS_THAN) {
+                    PC = address_absolute;
+                }
+                break;
+            }
+            case JMPG: {
+                if (flags.GREATER_THAN) {
+                    PC = address_absolute;
+                }            
+                break;
+            }
+            case JMPE: {
+                if (flags.EQUAL) {
+                    PC = address_absolute;
+                }            
+                break;
+            }
             case JSUB: {
                 StackPush(PC-1);
                 PC = address_absolute;
@@ -490,8 +539,9 @@ namespace sh {
                 break;
             }
         }
-
-        std::cout << std::format("  END PC[{:04x}] {} FE[{:02x}]", PC, GetOpcodeFullName(instruction, address_mode), fetched) << str() << std::endl;
+        if (debug_output) {
+            std::cout << std::format("  END PC[{:04x}] {} FE[{:02x}]", PC, GetOpcodeFullName(instruction, address_mode), fetched) << str() << std::endl;
+        }
 
     
     }
@@ -540,7 +590,7 @@ namespace sh {
     }
 
     u16 CPU::EncodeOpcode(u8 _instr, u8 _addr_mode) {
-        return (_instr << 8) | _addr_mode;
+        return ((_instr&0xff) << 8) | (_addr_mode & 0xff);
     
     }
     void CPU::DecodeOpcode(u16 _opcode, u8* _out_instr_ptr, u8* _out_am_ptr) {

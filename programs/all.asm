@@ -1,0 +1,52 @@
+LODA #$44
+INCR A
+STRA @aaa1
+LODB #$45
+INCR B
+STRB @bbb1
+LODC #$46
+INCR C 
+STRC @ccc1
+
+LODA #$01
+LODB #$02
+SWAP A,B
+STRA @ab_swap_a
+STRB @ab_swap_b
+
+LODA #$01
+LODB #$00
+MOVE A,B
+STRA @ab_move_a
+STRB @ab_move_b
+
+LODA #$0040
+LODB #$0050
+LODC #$0060
+PUSH A
+PUSH B
+PUSH C
+
+LODA 
+
+LODA #$0505
+MOVE A,X
+INCR A
+MOVE A,Y
+INCR A
+MOVE A,Z
+SWAP Y,Z
+
+
+LODA #$2000
+LODB #$1000
+FCST
+SUBC B
+FCCL
+STRA @a_sub_b
+
+LODA #$0010
+LODB #$0020
+FCCL
+ADDC B
+STRA @a_plus_b

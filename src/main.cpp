@@ -7,6 +7,36 @@ int main(int argc, char* argv[]) {
     std::string input_file_path = "";
     std::string output_file_path = "";
 
+
+    std::cout << R"USEAGE999( 
+                        ##########################
+                        #                        #    
+                        #  #####  #####  #    #  #                    
+                        #  #      #   #  #    #  #             
+                        #  #      #   #  #    #  #             
+                        #  #      #####  #    #  #               
+                        #  #      #      #    #  #            
+                        #  #####  #      ######  #                
+                        #                        #    
+                        ##########################
+    )USEAGE999" << std::endl;
+    if (sh::CmdOptionExists(argv, argv+argc, "-h") || sh::CmdOptionExists(argv, argv+argc, "--help")) {
+        std::cout << R"USEAGE999(
+
+-c, --compile           Compile assembly ---> program
+                            Required: -i, -o
+-r, --run               Run a program 
+                            Required: -i
+    --debug             Show Debug output when running (slow)
+-i, --input             Input File 
+-o, --output            Output File
+
+
+        
+        )USEAGE999" << std::endl;
+        return 0;
+    }
+
     bool ok = true;
     if (sh::CmdOptionExists(argv, argv+argc, "-c") || sh::CmdOptionExists(argv, argv+argc, "--compile")) {
 
@@ -44,9 +74,13 @@ int main(int argc, char* argv[]) {
             input_file_path = sh::GetCmdOption(argv, argv+argc, "--input");
         }
 
+        if (sh::CmdOptionExists(argv, argv+argc, "--debug")) {
+            cpu.debug_output = true;
+        }
         if (input_file_path.length() > 0) {
 
             if (cpu.LoadProgram(input_file_path)) {
+
                 while (!cpu.flags.HALT) {
                     cpu.Tick();
                 }

@@ -67,7 +67,7 @@ namespace sh {
             }
 
             if (first->type == INVALID) {
-                throw std::runtime_error("invalid token");
+                throw std::runtime_error("invalid token " + first->value);
             }
 
             if (first->type == KEYWORD) {
@@ -78,7 +78,7 @@ namespace sh {
                     out.address_mode = CPU::ADDRESS_MODES::IMP;
                 } else {
                     if (second->type == INVALID) {
-                        throw std::runtime_error("invalid token");
+                        throw std::runtime_error("invalid token " + second->value);
                     }
                     out.address_mode = second->address_mode;
 

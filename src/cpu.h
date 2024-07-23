@@ -10,62 +10,69 @@ namespace sh {
 
             enum INSTRUCTIONS : u8{
                 //          
-                ADDC=1,  //                         //add with carry    
-                SUBC,    //                         //subtract with carry
-                MULT,    //                         //multiply
-                INCR,    //   
-                DECR,    //   
-                BAND,    //         
-                BBOR,    //         
-                BNOR,    //   
-                BXOR,    //   
-                PUSH,    //   
-                POPS,    //   
-                LODA,    //         // load register with memory or immediate
-                LODB,    //   
-                LODC,    //   
-                STRA,    //         // store register to memory
-                STRB,    //   
-                STRC,    //   
-                SWAP,    //         //swap registers
-                MOVE,    //         //move register to register, overwrites dst, does not change source 
-                JUMP,    //         //jump
-                JMPC,    //         //jump on carry
-                JMPZ,    //         //jump on zero
-                JMPN,    //         //jump on negative
-                JSUB,    //         //jump to subroutine
-                RSUB,    //         //return from subroutine
-                HALT,    //         Flag Halt           Set
-                FCST,    //         Flag Carry          Set
-                FNST,    //         Flag Negative       Set
-                FZST,    //         Flag Zero           Set
-                FVST,    //         Flag Overflow       Set
-                FFST,    //         Flag Floating Point Set
-                FCCL,    //         Flag Carry          Clear
-                FNCL,    //         Flag Negative       Clear
-                FZCL,    //         Flag Zero           Clear
-                FVCL,    //         Flag Overflow       Clear
-                FFCL,    //         Flag Floating Point Clear
+                ADDC=0x01,      //         A = A + data :: add with carry    
+                SUBC,           //         A = A - data :: subtract with borrow
+                MULT,           //         A = A * data :: multiply
+                COMP,           //         Compare two registers, sets lt, gt, eq flags
+                INCR,           //   
+                DECR,           //   
+                BAND,           //         
+                BBOR,           //         
+                BNOR,           //   
+                BXOR,           //   
+                BSHL,           //         Bit Shift Left
+                BSHR,           //         Bit Shift Right                
+                LODA=0x20,      //         // load register with memory or immediate
+                LODB,           //   
+                LODC,           //   
+                STRA=0x30,           //         // store register to memory
+                STRB,           //   
+                STRC,           //   
+                SWAP=0x40,           //         //swap registers
+                MOVE,           //         //move register to register, overwrites dst, does not change source 
+                JUMP=0x50,      //         //jump
+                JMPC,           //         //jump on carry
+                JMPZ,           //         //jump on zero
+                JMPN,           //         //jump on negative
+                JMPL,           //         //jump on less than
+                JMPG,           //         //jump on greater than
+                JMPE,           //         //jump on equal to
+                JSUB=0x60,           //         //jump to subroutine
+                RSUB,           //         //return from subroutine
+                PUSH,           //   
+                POPS,           //   
+                FCST=0x80,      //         Flag Carry          Set
+                FNST,           //         Flag Negative       Set
+                FZST,           //         Flag Zero           Set
+                FVST,           //         Flag Overflow       Set
+                FFST,           //         Flag Floating Point Set
+                FCCL,           //         Flag Carry          Clear
+                FNCL,           //         Flag Negative       Clear
+                FZCL,           //         Flag Zero           Clear
+                FVCL,           //         Flag Overflow       Clear
+                FFCL,           //         Flag Floating Point Clear
+                HALT=0xf0,      //         Halt Processor
                 
             
             };
+            
 
             enum ADDRESS_MODES : u8 {
-                IMP=1,      //implied        
-                IMM,        //immediate
-                ABS,        //absolute
+                IMP=0x01,   //implied        
+                IMM=0x10,   //immediate
+                ABS=0x20,   //absolute
                 ABB,        //absolute+b
                 ABC,        //absolute+c
-                IND,        //indirect
+                IND=0x30,   //indirect
                 INB,        //indirect+b
                 INC,        //indurect+c
-                RGA,        //one register A
+                RGA=0x60,   //one register A
                 RGB,        //one register B
                 RGC,        //one register C
                 RGX,        //one register X
                 RGY,        //one register Y
                 RGZ,        //one register Z
-                RG2,        //two registers                                                                      
+                RG2=0x80,   //two registers                                                                      
             };
 
             enum REG_INDEX : u8 {
@@ -109,6 +116,8 @@ namespace sh {
             std::string str();
             
 
+            bool debug_output = false;
+
 
             struct Flags {
                 bool HALT = false;
@@ -117,6 +126,9 @@ namespace sh {
                 bool ZERO = false;
                 bool OVERFLOW = false;
                 bool FLOAT = false;
+                bool LESS_THAN = false;
+                bool GREATER_THAN = false;
+                bool EQUAL = false;
             } flags;
             
             CPU();
@@ -126,16 +138,20 @@ namespace sh {
             void Write(u16 address, u16 value);
             void StackPush(u16 value);
             u16 StackPop();
+            std::string GetFlagString();
             inline static const std::map<u8, std::vector<u8>> OPCODES_LOOKUP = {
                 { ADDC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { SUBC, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { MULT, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { COMP, {                                                                       RG2 }},
                 { INCR, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
                 { DECR, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
                 { BAND, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { BBOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { BNOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { BXOR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { BSHL, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
+                { BSHR, {      IMM, ABS, ABB, ABC, IND, INB, INC,      RGB, RGC, RGX, RGY, RGZ      }},
                 { PUSH, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
                 { POPS, {                                         RGA, RGB, RGC, RGX, RGY, RGZ      }},
                 { LODA, {      IMM, ABS, ABB, ABC, IND, INB, INC                                    }},
@@ -150,9 +166,11 @@ namespace sh {
                 { JMPC, {           ABS,           IND                                              }},
                 { JMPZ, {           ABS,           IND                                              }},
                 { JMPN, {           ABS,           IND                                              }},
+                { JMPL, {           ABS,           IND                                              }},
+                { JMPG, {           ABS,           IND                                              }},
+                { JMPE, {           ABS,           IND                                              }},
                 { JSUB, {           ABS,           IND                                              }},
                 { RSUB, { IMP                                                                       }},
-                { HALT, { IMP                                                                       }},
                 { FCST, { IMP                                                                       }},
                 { FNST, { IMP                                                                       }},
                 { FZST, { IMP                                                                       }},
@@ -163,6 +181,7 @@ namespace sh {
                 { FZCL, { IMP                                                                       }},
                 { FVCL, { IMP                                                                       }},
                 { FFCL, { IMP                                                                       }},
+                { HALT, { IMP                                                                       }},
             };
             // std::vector<u16> ValidOpcodes;
 
@@ -223,12 +242,15 @@ namespace sh {
                 { ADDC, "ADDC"},
                 { SUBC, "SUBC"},
                 { MULT, "MULT"},
+                { COMP, "COMP"},
                 { INCR, "INCR"},
                 { DECR, "DECR"},
                 { BAND, "BAND"},
                 { BBOR, "BBOR"},
                 { BNOR, "BNOR"},
                 { BXOR, "BXOR"},
+                { BSHL, "BSHL"},
+                { BSHR, "BSHR"},
                 { PUSH, "PUSH"},
                 { POPS, "POPS"},
                 { LODA, "LODA"},
@@ -243,9 +265,11 @@ namespace sh {
                 { JMPC, "JMPC"},
                 { JMPZ, "JMPZ"},
                 { JMPN, "JMPN"},
+                { JMPL, "JMPL"},
+                { JMPG, "JMPG"},
+                { JMPE, "JMPE"},
                 { JSUB, "JSUB"},
                 { RSUB, "RSUB"},
-                { HALT, "HALT"},
                 { FCST, "FCST"},
                 { FNST, "FNST"},
                 { FZST, "FZST"},
@@ -256,46 +280,47 @@ namespace sh {
                 { FZCL, "FZCL"},
                 { FVCL, "FVCL"},
                 { FFCL, "FFCL"},
+                { HALT, "HALT"},
             };
 
-            inline static const std::map<u8, std::string> INSTRUCTION_LONG_NAMES = {
-                { ADDC, "Add With Carry"},
-                { SUBC, "Subtract With Borrow"},
-                { MULT, "Multiply"},
-                { INCR, "Increment"},
-                { DECR, "Decrement"},
-                { BAND, "Bitwise AND"},
-                { BBOR, "Bitwise OR"},
-                { BNOR, "Bitwise NOR"},
-                { BXOR, "Bitwise XOR"},
-                { PUSH, "Push To Stack"},
-                { POPS, "Pop From Stack"},
-                { LODA, "Load A"},
-                { LODB, "Load B"},
-                { LODC, "Load C"},
-                { STRA, "Store A"},
-                { STRB, "Store B"},
-                { STRC, "Store C"},
-                { SWAP, "Swap Registers"},
-                { MOVE, "Move Registers"},
-                { JUMP, "Jump"},
-                { JMPC, "Jump On Carry"},
-                { JMPZ, "Jump On Zero"},
-                { JMPN, "Jump On Negative"},
-                { JSUB, "Jump To Subroutine"},
-                { RSUB, "Return From Subroutine"},
-                { HALT, "Halt"},
-                { FCST, "Flag C Set"},
-                { FNST, "Flag N Set"},
-                { FZST, "Flag Z Set"},
-                { FVST, "Flag V Set"},
-                { FFST, "Flag F Set"},
-                { FCCL, "Flag C Clear"},
-                { FNCL, "Flag N Clear"},
-                { FZCL, "Flag Z Clear"},
-                { FVCL, "Flag V Clear"},
-                { FFCL, "Flag F Clear"},
-            };
+            // inline static const std::map<u8, std::string> INSTRUCTION_LONG_NAMES = {
+            //     { ADDC, "Add With Carry"},
+            //     { SUBC, "Subtract With Borrow"},
+            //     { MULT, "Multiply"},
+            //     { INCR, "Increment"},
+            //     { DECR, "Decrement"},
+            //     { BAND, "Bitwise AND"},
+            //     { BBOR, "Bitwise OR"},
+            //     { BNOR, "Bitwise NOR"},
+            //     { BXOR, "Bitwise XOR"},
+            //     { PUSH, "Push To Stack"},
+            //     { POPS, "Pop From Stack"},
+            //     { LODA, "Load A"},
+            //     { LODB, "Load B"},
+            //     { LODC, "Load C"},
+            //     { STRA, "Store A"},
+            //     { STRB, "Store B"},
+            //     { STRC, "Store C"},
+            //     { SWAP, "Swap Registers"},
+            //     { MOVE, "Move Registers"},
+            //     { JUMP, "Jump"},
+            //     { JMPC, "Jump On Carry"},
+            //     { JMPZ, "Jump On Zero"},
+            //     { JMPN, "Jump On Negative"},
+            //     { JSUB, "Jump To Subroutine"},
+            //     { RSUB, "Return From Subroutine"},
+            //     { HALT, "Halt"},
+            //     { FCST, "Flag C Set"},
+            //     { FNST, "Flag N Set"},
+            //     { FZST, "Flag Z Set"},
+            //     { FVST, "Flag V Set"},
+            //     { FFST, "Flag F Set"},
+            //     { FCCL, "Flag C Clear"},
+            //     { FNCL, "Flag N Clear"},
+            //     { FZCL, "Flag Z Clear"},
+            //     { FVCL, "Flag V Clear"},
+            //     { FFCL, "Flag F Clear"},
+            // };
 
             inline static const std::map<char, u8> REGISTER_NAMES = {
                 { 'A', RIA },
@@ -324,43 +349,50 @@ namespace sh {
                 {RIZ, RGZ },
             
             };
+            
             inline static const std::map<std::string, u8> INSTRUCTIONS_BY_NAME = {
-                { "ADDC", ADDC },
-                { "SUBC", SUBC },
-                { "MULT", MULT },
-                { "INCR", INCR },
-                { "DECR", DECR },
-                { "BAND", BAND },
-                { "BBOR", BBOR },
-                { "BNOR", BNOR },
-                { "BXOR", BXOR },
-                { "PUSH", PUSH },
-                { "POPS", POPS },
-                { "LODA", LODA },
-                { "LODB", LODB },
-                { "LODC", LODC },
-                { "STRA", STRA },
-                { "STRB", STRB },
-                { "STRC", STRC },
-                { "SWAP", SWAP },
-                { "MOVE", MOVE },
-                { "JUMP", JUMP },
-                { "JMPC", JMPC },
-                { "JMPZ", JMPZ },
-                { "JMPN", JMPN },
-                { "JSUB", JSUB },
-                { "RSUB", RSUB },
-                { "HALT", HALT },
-                { "FCST", FCST },
-                { "FNST", FNST },
-                { "FZST", FZST },
-                { "FVST", FVST },
-                { "FFST", FFST },
-                { "FCCL", FCCL },
-                { "FNCL", FNCL },
-                { "FZCL", FZCL },
-                { "FVCL", FVCL },
-                { "FFCL", FFCL },
+                { "ADDC", ADDC},
+                { "SUBC", SUBC},
+                { "MULT", MULT},
+                { "COMP", COMP},
+                { "INCR", INCR},
+                { "DECR", DECR},
+                { "BAND", BAND},
+                { "BBOR", BBOR},
+                { "BNOR", BNOR},
+                { "BXOR", BXOR},
+                { "BSHL", BSHL},
+                { "BSHR", BSHR},
+                { "PUSH", PUSH},
+                { "POPS", POPS},
+                { "LODA", LODA},
+                { "LODB", LODB},
+                { "LODC", LODC},
+                { "STRA", STRA},
+                { "STRB", STRB},
+                { "STRC", STRC},
+                { "SWAP", SWAP},
+                { "MOVE", MOVE},
+                { "JUMP", JUMP},
+                { "JMPC", JMPC},
+                { "JMPZ", JMPZ},
+                { "JMPN", JMPN},
+                { "JMPL", JMPL},
+                { "JMPG", JMPG},
+                { "JMPE", JMPE},
+                { "JSUB", JSUB},
+                { "RSUB", RSUB},
+                { "FCST", FCST},
+                { "FNST", FNST},
+                { "FZST", FZST},
+                { "FVST", FVST},
+                { "FFST", FFST},
+                { "FCCL", FCCL},
+                { "FNCL", FNCL},
+                { "FZCL", FZCL},
+                { "FVCL", FVCL},
+                { "FFCL", FFCL},
+                { "HALT", HALT},
             };     
 
             inline static const std::map<u16, std::string> SPECIAL_ADDRESSES = {
