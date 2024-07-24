@@ -1,8 +1,8 @@
-                        #include "common.h"
+#include "common.h"
 
 int main(int argc, char* argv[]) {
 
-    sh::CmdArgumentCount = argc;
+    sh::Funcs::CmdArgumentCount = argc;
     
     sh::CPU cpu;
     sh::Assembler assembler;
@@ -12,12 +12,12 @@ int main(int argc, char* argv[]) {
 
 
     
-    for (int i = 0; i < sh::CmdArgumentCount; i += 1) {
-        sh::CmdArguments.push_back(argv[i]);
+    for (int i = 0; i < sh::Funcs::CmdArgumentCount; i += 1) {
+        sh::Funcs::CmdArguments.push_back(argv[i]);
     }
 
-    for (int i = 0; i < sh::CmdArgumentCount; i += 1) {
-        std::cout << sh::CmdArguments[i] << std::endl;
+    for (int i = 0; i < sh::Funcs::CmdArgumentCount; i += 1) {
+        std::cout << sh::Funcs::CmdArguments.at(i) << std::endl;
 
 
     }
@@ -26,17 +26,18 @@ int main(int argc, char* argv[]) {
 
     #####################################################
     #...................................................#    
-    #..#####..#####..#....#....######..###.###..#....#..#                    
+    #..#####..#####..#....#....######..##...##..#....#..#                    
+    #..#......#...#..#....#....#.......#.#.#.#..#....#..#             
     #..#......#...#..#....#....#.......#..#..#..#....#..#             
-    #..#......#...#..#....#....####....#.....#..#....#..#             
     #..#......#####..#....#....####....#.....#..#....#..#               
+    #..#......#......#....#....#.......#.....#..#....#..#            
     #..#......#......#....#....#.......#.....#..#....#..#            
     #..#####..#......######....######..#.....#..######..#                
     #...................................................#    
     #####################################################
 
     )USEAGE999" << std::endl;
-    if (sh::CmdOptionExists("-h", "--help")) {
+    if (sh::Funcs::CmdOptionExists("-h", "--help")) {
         std::cout << R"USEAGE999(
   Arguments          |  Description
 ---------------------|--------------------------------------
@@ -52,14 +53,14 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    bool useWindow = (sh::CmdOptionExists("-w", "-window"));
+    bool useWindow = (sh::Funcs::CmdOptionExists("-w", "-window"));
 
     bool ok = true;
     int return_value = 0;
-    if (sh::CmdOptionExists("-c", "--compile")) {
+    if (sh::Funcs::CmdOptionExists("-c", "--compile")) {
 
-        input_file_path = sh::GetCmdOption("-i", "--input");
-        output_file_path = sh::GetCmdOption("-o", "--output");
+        input_file_path = sh::Funcs::GetCmdOption("-i", "--input");
+        output_file_path = sh::Funcs::GetCmdOption("-o", "--output");
 
         if (input_file_path.length() > 0 && output_file_path.length() > 0) {
             assembler.ParseFromFile(input_file_path, output_file_path);
@@ -69,11 +70,11 @@ int main(int argc, char* argv[]) {
             return_value = -1;
         }
 
-    } else if (sh::CmdOptionExists("-r", "--run")) {
+    } else if (sh::Funcs::CmdOptionExists("-r", "--run")) {
 
-        input_file_path = sh::GetCmdOption("-i", "--input");
+        input_file_path = sh::Funcs::GetCmdOption("-i", "--input");
 
-        cpu.debug_output = sh::CmdOptionExists("--debug");
+        cpu.debug_output = sh::Funcs::CmdOptionExists("--debug");
 
         if (input_file_path.length() > 0) {
 

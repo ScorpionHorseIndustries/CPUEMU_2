@@ -175,7 +175,7 @@ namespace sh {
         std::vector<Token> tokens;
 
         std::string cpy = std::string(ln);
-        cpy = ToUpper(cpy);
+        cpy = Funcs::ToUpper(cpy);
 
         if (cpy.starts_with(';')) {
             //entire line is a comment
@@ -189,7 +189,7 @@ namespace sh {
         }
 
 
-        auto elements = SplitString(cpy,' ');
+        auto elements = Funcs::SplitString(cpy,' ');
 
         if (elements.size() == 1) {
             if (elements[0].ends_with(':')) {
@@ -226,11 +226,11 @@ namespace sh {
             std::vector<std::string> strLines;
             while (std::getline(strm, ln, '\n')) {
                 
-                Remove(ln, '\n');
-                Remove(ln, '\r');
-                Replace(ln, '\t', ' ');
-                Squeeze(ln);
-                Trim(ln);
+                Funcs::Remove(ln, '\n');
+                Funcs::Remove(ln, '\r');
+                Funcs::Replace(ln, '\t', ' ');
+                Funcs::Squeeze(ln);
+                Funcs::Trim(ln);
                 if (ln.length() == 0) continue;
 
                 TokenLine tl;
@@ -277,11 +277,11 @@ namespace sh {
             for (char c : value) {
                 if (c == ',') break;
                 if (c == ')') break;
-                if (CharInList(c, DECIMAL_CHARS)) {
+                if (Funcs::CharInList(c, DECIMAL_CHARS)) {
                     sub_value += c;
                 }
 
-                if (readHex && CharInList(c, HEX_CHARS)) {
+                if (readHex && Funcs::CharInList(c, HEX_CHARS)) {
                     sub_value += c;
                 }
             }
@@ -297,7 +297,7 @@ namespace sh {
             for (char c : value) {
                 if (c == ',') break;
                 if (c == ')') break;
-                if (CharInList(c, LABEL_CHARS)) {
+                if (Funcs::CharInList(c, LABEL_CHARS)) {
                     sub_value += c;
                 }
             
@@ -327,11 +327,11 @@ namespace sh {
     }
 
     bool Assembler::LabelExists(std::string lbl) { 
-        std::string k = GetKey(lbl);
+        std::string k = Funcs::GetKey(lbl);
         return Labels.contains(k);
     }
     Assembler::Label& Assembler::LabelGet(std::string lbl) { 
-        std::string k = GetKey(lbl);
+        std::string k = Funcs::GetKey(lbl);
         if (LabelExists(lbl)) {
             return Labels[k];
         } else {
@@ -339,7 +339,7 @@ namespace sh {
         }
     }
     void Assembler::LabelSet(std::string lbl, u16 address, bool isVar) { 
-        std::string k = GetKey(lbl);
+        std::string k = Funcs::GetKey(lbl);
         if (LabelExists(k)) {
             Labels[k].address = address;
             Labels[k].isVar = isVar;

@@ -50,3 +50,5 @@ LODB #$0020
 FCCL
 ADDC B
 STRA @a_plus_b
+
+HALT

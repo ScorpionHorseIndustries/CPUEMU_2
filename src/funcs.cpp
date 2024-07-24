@@ -3,7 +3,7 @@
 
 namespace sh {
 
-    std::string GetKey(const std::string str) {
+    std::string Funcs::GetKey(const std::string str) {
         std::string k = ToUpper(str);
         k.erase(std::remove(k.begin(), k.end(), ':'), k.end());
         k.erase(std::remove(k.begin(), k.end(), '#'), k.end());
@@ -14,13 +14,13 @@ namespace sh {
 
     }
 
-    float MapFloat(float n, float start1, float stop1, float start2, float stop2) {
+    float Funcs::MapFloat(float n, float start1, float stop1, float start2, float stop2) {
 
         return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
             
     }
 
-    std::string ToUpper(const std::string str) {
+    std::string Funcs::ToUpper(const std::string str) {
         std::string k = str.substr(0);
         
         std::transform(str.begin(), str.end(), k.begin(), ::toupper);
@@ -28,57 +28,57 @@ namespace sh {
         return k;
     }
 
-    void Trim(std::string &s) {
+    void Funcs::Trim(std::string &s) {
         LTrim(s);
         RTrim(s);
         
     }
-    void Remove(std::string& s, char remove_me) {   
+    void Funcs::Remove(std::string& s, char remove_me) {   
         s.erase(std::remove(s.begin(), s.end(), remove_me), s.end());
     }
     
-    void Replace(std::string& s, char replace_me, char with_me) {
+    void Funcs::Replace(std::string& s, char replace_me, char with_me) {
         std::replace(s.begin(), s.end(), replace_me, with_me);
     }
-    bool BothAreSpaces(char lhs, char rhs) {
+    bool Funcs::BothAreSpaces(char lhs, char rhs) {
         return (lhs == rhs) && (lhs == ' ');
     }
-    void Squeeze(std::string& s) {
+    void Funcs::Squeeze(std::string& s) {
         std::string::iterator new_end = std::unique(s.begin(), s.end(), BothAreSpaces);
         s.erase(new_end, s.end());
     }
 
-    void LTrim(std::string &s) {
+    void Funcs::LTrim(std::string &s) {
         s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
             return !std::isspace(ch);
         }));
     }
 
     // trim from end (in place)
-    void RTrim(std::string &s) {
+    void Funcs::RTrim(std::string &s) {
         s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
             return !std::isspace(ch);
         }).base(), s.end());
     }
 
-    u16 StoreF16AsU16(f16 f) {
+    u16 Funcs::StoreF16AsU16(f16 f) {
         u16 rt = *(u16*)&f;
         return rt;
     }
-    f16 GetF16FromU16Bytes(u16 n) {
+    f16 Funcs::GetF16FromU16Bytes(u16 n) {
         f16 f = *(f16*)&n;
         return f;
     }
-    u16 StoreIntAsU16(i16 i) {
+    u16 Funcs::StoreIntAsU16(i16 i) {
         u16 rt = *(u16*)&i;
         return rt;
     }
-    i16 GetInt16FromU16Bytes(u16 u) {
+    i16 Funcs::GetInt16FromU16Bytes(u16 u) {
         i16 rt = *(i16*)&u;
         return rt;
     }
 
-    std::vector<std::string> SplitString(const std::string& str, char delim) {
+    std::vector<std::string> Funcs::SplitString(const std::string& str, char delim) {
         std::vector<std::string> items;
         std::string item;
         std::istringstream inputStream(str);
@@ -90,11 +90,11 @@ namespace sh {
 
      }
 
-    bool CharInList(char c, const std::string list) {
+    bool Funcs::CharInList(char c, const std::string list) {
         return (list.find_first_of(c) != std::string::npos);
     }
 
-    bool AllInList(const std::string& str, const std::string list) {
+    bool Funcs::AllInList(const std::string& str, const std::string list) {
         for (char c : str) {
             if (!CharInList(c,list)) {
                 return false;
@@ -105,23 +105,23 @@ namespace sh {
     }
 
 
-    bool IsIdentStart(char c) {
+    bool Funcs::IsIdentStart(char c) {
         return CharInList(c, IDENT_START);
     }
 
-    bool IsIdentMiddle(char c) {
+    bool Funcs::IsIdentMiddle(char c) {
         return CharInList(c,IDENT_MIDDLE );
     }
 
-    bool IsNumericStart(char c) {
+    bool Funcs::IsNumericStart(char c) {
         return CharInList(c, NUMERIC_START);
     }
 
-    bool IsNumericMiddle(char c) {
+    bool Funcs::IsNumericMiddle(char c) {
         return CharInList(c, NUMERIC_MIDDLE);
     }
 
-    std::string GetCmdOption( const std::string& option0, const std::string& option1) {
+    std::string Funcs::GetCmdOption( const std::string& option0, const std::string& option1) {
         if (CmdOptionExists(option0)) {
             return GetCmdOption(option0);
 
@@ -134,7 +134,7 @@ namespace sh {
 
     }
 
-    std::string GetCmdOption( const std::string& option)
+    std::string Funcs::GetCmdOption( const std::string& option)
     {
         // char ** begin = *sh::CmdArguments;
         // char ** end   = *sh::CmdArguments+CmdArgumentCount;
@@ -160,16 +160,16 @@ namespace sh {
 
 
 
-    bool CmdOptionExists(const std::string& option0, const std::string& option1) {
+    bool Funcs::CmdOptionExists(const std::string& option0, const std::string& option1) {
         return CmdOptionExists(option0) || CmdOptionExists(option1);
     }
 
-    bool CmdOptionExists(const std::string& option) {
+    bool Funcs::CmdOptionExists(const std::string& option) {
         return std::find(CmdArguments.begin(), CmdArguments.end(), option) != CmdArguments.end();
     }
 
 
-    sf::Color GetColour(u16 c) {
+    sf::Color Funcs::GetColour(u16 c) {
         u8 blu = c       & 0b11111;
         u8 grn = (c>>5)  & 0b11111;
         u8 red = (c>>10) & 0b11111;

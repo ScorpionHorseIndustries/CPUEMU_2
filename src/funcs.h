@@ -5,42 +5,43 @@
 
 namespace sh {
 
+    class Funcs {
+        public:
+        static inline int                       CmdArgumentCount;
+        static inline std::vector<std::string>  CmdArguments;
 
-    static inline int CmdArgumentCount;
-    static inline std::vector<std::string> CmdArguments;
+        static std::string ToUpper(const std::string str);
+        static std::string GetKey(const std::string str);
+        static float MapFloat(float n, float start1, float stop1, float start2, float stop2);
+        static void LTrim(std::string& s);
+        static void RTrim(std::string& s);
+        static void Trim(std::string& s);
 
-    using string = std::string;
-    std::string ToUpper(const std::string str);
-    std::string GetKey(const std::string str);
-    float MapFloat(float n, float start1, float stop1, float start2, float stop2);
-    void LTrim(std::string& s);
-    void RTrim(std::string& s);
-    void Trim(std::string& s);
+        static u16 StoreF16AsU16(f16 f);
+        static f16 GetF16FromU16Bytes(u16 n);
+        static u16 StoreIntAsU16(i16 i);
+        static i16 GetInt16FromU16Bytes(u16 u);
+        static bool BothAreSpaces(char lhs, char rhs);
+        static void Squeeze(std::string& s);
+        static void Remove(std::string &s, char remove_me);
+        static void Replace(std::string& s, char replace_me, char with_me);
+        static std::vector<std::string> SplitString(const std::string& str, char delim);
 
-    u16 StoreF16AsU16(f16 f);
-    f16 GetF16FromU16Bytes(u16 n);
-    u16 StoreIntAsU16(i16 i);
-    i16 GetInt16FromU16Bytes(u16 u);
-    bool BothAreSpaces(char lhs, char rhs);
-    void Squeeze(string& s);
-    void Remove(string &s, char remove_me);
-    void Replace(string& s, char replace_me, char with_me);
-    std::vector<std::string> SplitString(const std::string& str, char delim);
+        static bool CharInList(char c, const std::string list);
+        static bool IsIdentStart(char c);
+        static bool IsIdentMiddle(char c);
+        static bool IsNumericStart(char c);
+        static bool IsNumericMiddle(char c);
 
-    bool CharInList(char c, const std::string list);
-    bool IsIdentStart(char c);
-    bool IsIdentMiddle(char c);
-    bool IsNumericStart(char c);
-    bool IsNumericMiddle(char c);
-
-    bool CmdOptionExists(const std::string& option0, const std::string& option1);
-    bool CmdOptionExists(const std::string& option);
-    // bool CmdOptionExists(char** begin, char** end, const std::string& option);
-    std::string GetCmdOption(const std::string& option);
-    std::string GetCmdOption(const std::string& option0, const std::string& option1);
-    // char* GetCmdOption(char ** begin, char ** end, const std::string& option);
-    bool AllInList(const std::string& str, const std::string list);
-    sf::Color GetColour(u16 c);
+        static bool CmdOptionExists(const std::string& option0, const std::string& option1);
+        static bool CmdOptionExists(const std::string& option);
+        // bool CmdOptionExists(char** begin, char** end, const std::string& option);
+        static std::string GetCmdOption(const std::string& option);
+        static std::string GetCmdOption(const std::string& option0, const std::string& option1);
+        // char* GetCmdOption(char ** begin, char ** end, const std::string& option);
+        static bool AllInList(const std::string& str, const std::string list);
+        static sf::Color GetColour(u16 c);
+    };
 }   
 
 #endif
