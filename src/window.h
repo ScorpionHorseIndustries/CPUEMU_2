@@ -5,7 +5,7 @@
 namespace sh {
     class Window {
         public:
-            int Loop();
+            int Loop(CPU& cpu);
     
     };
 }

@@ -10,8 +10,11 @@
             "request": "launch",
             "program": "${workspaceFolder}\\build\\bin\\cpuemu.exe",
             "args": [
-                "-f",
-                "programs\\basics.asm"
+                "-i",
+                "programs\\all.asm",
+                "-o",
+                "execs\\all.exec",
+                "--compile"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

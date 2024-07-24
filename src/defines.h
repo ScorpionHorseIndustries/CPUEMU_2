@@ -25,6 +25,8 @@ typedef double          f64;
 #define HEX_CHARS       "ABCDEF"
 
 namespace sh {
+    
+    constexpr int CPU_SCREEN_SIZE = 128;
     constexpr int CPU_MEMORY_SIZE = 0x10000;
     constexpr int CPU_LAST_INDEX  = 0xffff;
     constexpr int CPU_VRAM_START  = 0xbf00;

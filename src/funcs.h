@@ -6,6 +6,9 @@
 namespace sh {
 
 
+    static inline int CmdArgumentCount;
+    static inline std::vector<std::string> CmdArguments;
+
     using string = std::string;
     std::string ToUpper(const std::string str);
     std::string GetKey(const std::string str);
@@ -30,9 +33,14 @@ namespace sh {
     bool IsNumericStart(char c);
     bool IsNumericMiddle(char c);
 
-    bool CmdOptionExists(char** begin, char** end, const std::string& option);
-    char* GetCmdOption(char ** begin, char ** end, const std::string& option);
+    bool CmdOptionExists(const std::string& option0, const std::string& option1);
+    bool CmdOptionExists(const std::string& option);
+    // bool CmdOptionExists(char** begin, char** end, const std::string& option);
+    std::string GetCmdOption(const std::string& option);
+    std::string GetCmdOption(const std::string& option0, const std::string& option1);
+    // char* GetCmdOption(char ** begin, char ** end, const std::string& option);
     bool AllInList(const std::string& str, const std::string list);
+    sf::Color GetColour(u16 c);
 }   
 
 #endif

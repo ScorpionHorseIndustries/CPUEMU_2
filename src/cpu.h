@@ -22,23 +22,23 @@ namespace sh {
                 BXOR,           //   
                 BSHL,           //         Bit Shift Left
                 BSHR,           //         Bit Shift Right                
-                LODA=0x20,      //         // load register with memory or immediate
+                LODA=0x20,      //         load register with memory or immediate
                 LODB,           //   
                 LODC,           //   
-                STRA=0x30,           //         // store register to memory
+                STRA=0x30,      //         store register to memory
                 STRB,           //   
                 STRC,           //   
-                SWAP=0x40,           //         //swap registers
-                MOVE,           //         //move register to register, overwrites dst, does not change source 
-                JUMP=0x50,      //         //jump
-                JMPC,           //         //jump on carry
-                JMPZ,           //         //jump on zero
-                JMPN,           //         //jump on negative
-                JMPL,           //         //jump on less than
-                JMPG,           //         //jump on greater than
-                JMPE,           //         //jump on equal to
-                JSUB=0x60,           //         //jump to subroutine
-                RSUB,           //         //return from subroutine
+                SWAP=0x40,      //         swap registers
+                MOVE,           //         move register to register, overwrites dst, does not change source 
+                JUMP=0x50,      //         jump
+                JMPC,           //         jump on carry
+                JMPZ,           //         jump on zero
+                JMPN,           //         jump on negative
+                JMPL,           //         jump on less than
+                JMPG,           //         jump on greater than
+                JMPE,           //         jump on equal to
+                JSUB=0x60,      //         jump to subroutine
+                RSUB,           //         return from subroutine
                 PUSH,           //   
                 POPS,           //   
                 FCST=0x80,      //         Flag Carry          Set
@@ -124,8 +124,8 @@ namespace sh {
                 bool CARRY = false;
                 bool NEGATIVE = false;
                 bool ZERO = false;
-                bool OVERFLOW = false;
-                bool FLOAT = false;
+                bool OVERFLOW = false;      // not implemented
+                bool FLOAT = false;         // not implemented
                 bool LESS_THAN = false;
                 bool GREATER_THAN = false;
                 bool EQUAL = false;

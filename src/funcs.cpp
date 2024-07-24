@@ -108,32 +108,74 @@ namespace sh {
     bool IsIdentStart(char c) {
         return CharInList(c, IDENT_START);
     }
+
     bool IsIdentMiddle(char c) {
         return CharInList(c,IDENT_MIDDLE );
     }
+
     bool IsNumericStart(char c) {
         return CharInList(c, NUMERIC_START);
     }
+
     bool IsNumericMiddle(char c) {
         return CharInList(c, NUMERIC_MIDDLE);
     }
 
+    std::string GetCmdOption( const std::string& option0, const std::string& option1) {
+        if (CmdOptionExists(option0)) {
+            return GetCmdOption(option0);
 
-    char* GetCmdOption(char ** begin, char ** end, const std::string& option)
-    {
-        char ** itr = std::find(begin, end, option);
-        //we found the value and there is a following value
-        if (itr != end && itr+1 != end) {
-            //get the next token
-            itr += 1;
-            return *itr;
+        } else if (CmdOptionExists(option1)) {
+            return GetCmdOption(option1);
+        } else {
+            return "";
         }
-        return 0;
+
+
     }
 
-    bool CmdOptionExists(char** begin, char** end, const std::string& option)
+    std::string GetCmdOption( const std::string& option)
     {
-        return std::find(begin, end, option) != end;
+        // char ** begin = *sh::CmdArguments;
+        // char ** end   = *sh::CmdArguments+CmdArgumentCount;
+
+        auto pos = std::find(CmdArguments.begin(), CmdArguments.end(), option);
+
+        if (pos == CmdArguments.end()) {
+            
+            return "";
+        } else {
+            pos += 1;
+            if (pos == CmdArguments.end()) {
+                return "";
+            } else {
+                int idx = std::distance(CmdArguments.begin(), pos);
+                return CmdArguments[idx];
+
+            }
+
+        }
+        
+    }
+
+
+
+    bool CmdOptionExists(const std::string& option0, const std::string& option1) {
+        return CmdOptionExists(option0) || CmdOptionExists(option1);
+    }
+
+    bool CmdOptionExists(const std::string& option) {
+        return std::find(CmdArguments.begin(), CmdArguments.end(), option) != CmdArguments.end();
+    }
+
+
+    sf::Color GetColour(u16 c) {
+        u8 blu = c       & 0b11111;
+        u8 grn = (c>>5)  & 0b11111;
+        u8 red = (c>>10) & 0b11111;
+
+        return sf::Color(red * 8, grn * 8, blu * 8);
+
     }
 
 }

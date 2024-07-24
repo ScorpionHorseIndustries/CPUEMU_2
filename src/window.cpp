@@ -3,10 +3,13 @@
 
 namespace sh {
 
-    int Window::Loop() {
-        auto window = sf::RenderWindow( {256,256}, "CPU EMU");
+    int Window::Loop(CPU& cpu) {
+        auto window = sf::RenderWindow( {CPU_SCREEN_SIZE*2,CPU_SCREEN_SIZE*2}, "CPU EMU");
 
         window.setFramerateLimit(60);
+        sf::Image screenBuffer;
+        screenBuffer.create(CPU_SCREEN_SIZE*2, CPU_SCREEN_SIZE*2);
+
 
         sf::Clock clock;
         sf::Clock deltaClock;
@@ -22,6 +25,15 @@ namespace sh {
                 }
             }
 
+
+            for (int y = 0; y < CPU_SCREEN_SIZE; y += 1) {
+                for (int x = 0; x < CPU_SCREEN_SIZE; x += 1) {
+                    int idx = CPU_VRAM_START + (y * CPU_SCREEN_SIZE + x);
+
+                    
+                }
+            }
+            
 
             //DRAW GUI
             
