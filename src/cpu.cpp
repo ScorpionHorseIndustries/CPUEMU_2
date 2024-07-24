@@ -496,6 +496,7 @@ namespace sh {
             }
             case HALT: { 
                 flags.HALT = true;
+                std::cout << "HALT!\n";
                 break;
             }
             case FCST: { 

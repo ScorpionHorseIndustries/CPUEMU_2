@@ -3,9 +3,13 @@
 namespace sh {
 
     bool Assembler::ParseFromFile(std::string input_path, std::string output_path) {
+
         input_file_path = input_path;
         output_file_path = output_path;
+        Funcs::Message(std::format("Input File  [{}] ", input_path));
+        Funcs::Message(std::format("Output File [{}] ", output_path));
 
+        
         bool ok = LoadFile(input_file_path);
         if (ok) {
             ok = Tokenise();
@@ -16,9 +20,9 @@ namespace sh {
         }
 
         if (ok) {
-            std::cout << "OK!" << std::endl;
+            Funcs::Message("Process Complete");
         }  else {
-            std::cout << "FAILED!" << std::endl;
+            Funcs::Message("Process Failed");
         }
 
 
@@ -55,6 +59,7 @@ namespace sh {
     }
 
     bool Assembler::Assemble() {
+        Funcs::Message("Attempting `Assemlby`...");
         // std::vector<Output> outputLines;
         outputLines.clear();
         u16 byte_position = 0;
@@ -166,7 +171,7 @@ namespace sh {
         file.flush();
         file.close();
 
-        
+        Funcs::Message(std::format("Wrote {} bytes to [{}]", bytes.size(), output_file_path));
         return (outputLines.size() > 0);
     
     }
@@ -219,6 +224,7 @@ namespace sh {
     }
 
     bool Assembler::Tokenise() {
+        Funcs::Message("Attempting to Tokenise input data");
         lines.clear();
         if (data.length() > 0) {
             std::stringstream strm(data);

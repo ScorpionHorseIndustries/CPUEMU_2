@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    bool useWindow = (sh::Funcs::CmdOptionExists("-w", "-window"));
+    bool useWindow = (sh::Funcs::CmdOptionExists("-w", "--window"));
 
     bool ok = true;
     int return_value = 0;

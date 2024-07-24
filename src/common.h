@@ -14,6 +14,9 @@
 #include <regex>
 #include <fstream>
 #include <SFML/Graphics.hpp>
+#include <iomanip>
+#include <ctime>
+#include <chrono>
 #include "defines.h"
 #include "funcs.h"
 #include "cpu.h"

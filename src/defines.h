@@ -40,6 +40,13 @@ namespace sh {
     constexpr int CPU_RAND_04     = CPU_RAND_03+1;
 
 
+
+    constexpr int SFML_RES              = 4;
+    constexpr int SFML_WINDOW_WIDTH     = CPU_SCREEN_SIZE * SFML_RES;
+    constexpr int SFML_WINDOW_HEIGHT    = CPU_SCREEN_SIZE * SFML_RES;
+
+
+
 }
 
 #endif

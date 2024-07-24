@@ -104,6 +104,17 @@ namespace sh {
         return true;
     }
 
+    void Funcs::Message(std::string msg) {
+
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count() % 1000;
+
+        auto t = std::time(nullptr);
+        auto now = *std::localtime(&t);
+        
+        std::cout << std::put_time(&now, "%Y-%m-%d %H:%M:%S") << "." << std::format("{:03}", ms);
+        std::cout << " " << msg << "\n";
+    }
 
     bool Funcs::IsIdentStart(char c) {
         return CharInList(c, IDENT_START);
