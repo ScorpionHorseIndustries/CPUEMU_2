@@ -60,6 +60,7 @@ namespace sh {
 
     bool Assembler::Assemble() {
         Funcs::Message("Attempting `Assemlby`...");
+        BuildConstants();
         // std::vector<Output> outputLines;
         outputLines.clear();
         u16 byte_position = 0;
@@ -102,6 +103,10 @@ namespace sh {
                         out.label = second->sub_value;
                         out.valueIsLabel = true;
                         out.value = 0;
+                    } else if (second->sub_value_type == CNS) {
+                        out.label = second->sub_value;
+                        out.value = ConstantGet(out.label);
+                    
                     } else {
                         out.value = second->value_int;
                     }
@@ -299,7 +304,7 @@ namespace sh {
  
         }
 
-        if (sub_value_type == LBL || sub_value_type == VAR) {
+        if (sub_value_type == LBL || sub_value_type == VAR || sub_value_type == CNS) {
             for (char c : value) {
                 if (c == ',') break;
                 if (c == ')') break;
@@ -332,6 +337,17 @@ namespace sh {
 
     }
 
+    u16 Assembler::ConstantGet(std::string constant_name) {
+        std::string k = Funcs::GetKey(constant_name);
+
+        if (Constants.contains(k)) {
+            return Constants[k];
+        } else {
+            throw std::runtime_error(std::format("constant [{}] not found", constant_name));
+        }
+
+    }
+
     bool Assembler::LabelExists(std::string lbl) { 
         std::string k = Funcs::GetKey(lbl);
         return Labels.contains(k);
@@ -341,7 +357,7 @@ namespace sh {
         if (LabelExists(lbl)) {
             return Labels[k];
         } else {
-            throw std::runtime_error(std::format("label [{}]not found", lbl));
+            throw std::runtime_error(std::format("label [{}] not found", lbl));
         }
     }
     void Assembler::LabelSet(std::string lbl, u16 address, bool isVar) { 
@@ -352,6 +368,229 @@ namespace sh {
         } else {
             Labels.insert({k, {address,isVar}});
         }
+    }
+
+
+    void Assembler::BuildConstants() {
+
+
+        Constants.clear();
+        Constants.insert_or_assign( "KEY_A_MASK"                 , 0x0001 );
+        Constants.insert_or_assign( "KEY_A_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_B_MASK"                 , 0x0002 );
+        Constants.insert_or_assign( "KEY_B_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_C_MASK"                 , 0x0004 );
+        Constants.insert_or_assign( "KEY_C_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_D_MASK"                 , 0x0008 );
+        Constants.insert_or_assign( "KEY_D_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_E_MASK"                 , 0x0010 );
+        Constants.insert_or_assign( "KEY_E_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_F_MASK"                 , 0x0020 );
+        Constants.insert_or_assign( "KEY_F_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_G_MASK"                 , 0x0040 );
+        Constants.insert_or_assign( "KEY_G_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_H_MASK"                 , 0x0080 );
+        Constants.insert_or_assign( "KEY_H_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_I_MASK"                 , 0x0100 );
+        Constants.insert_or_assign( "KEY_I_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_J_MASK"                 , 0x0200 );
+        Constants.insert_or_assign( "KEY_J_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_K_MASK"                 , 0x0400 );
+        Constants.insert_or_assign( "KEY_K_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_L_MASK"                 , 0x0800 );
+        Constants.insert_or_assign( "KEY_L_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_M_MASK"                 , 0x1000 );
+        Constants.insert_or_assign( "KEY_M_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_N_MASK"                 , 0x2000 );
+        Constants.insert_or_assign( "KEY_N_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_O_MASK"                 , 0x4000 );
+        Constants.insert_or_assign( "KEY_O_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_P_MASK"                 , 0x8000 );
+        Constants.insert_or_assign( "KEY_P_ADDRESS"              , 0xBCF0 );
+        Constants.insert_or_assign( "KEY_Q_MASK"                 , 0x0001 );
+        Constants.insert_or_assign( "KEY_Q_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_R_MASK"                 , 0x0002 );
+        Constants.insert_or_assign( "KEY_R_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_S_MASK"                 , 0x0004 );
+        Constants.insert_or_assign( "KEY_S_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_T_MASK"                 , 0x0008 );
+        Constants.insert_or_assign( "KEY_T_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_U_MASK"                 , 0x0010 );
+        Constants.insert_or_assign( "KEY_U_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_V_MASK"                 , 0x0020 );
+        Constants.insert_or_assign( "KEY_V_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_W_MASK"                 , 0x0040 );
+        Constants.insert_or_assign( "KEY_W_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_X_MASK"                 , 0x0080 );
+        Constants.insert_or_assign( "KEY_X_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_Y_MASK"                 , 0x0100 );
+        Constants.insert_or_assign( "KEY_Y_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_Z_MASK"                 , 0x0200 );
+        Constants.insert_or_assign( "KEY_Z_ADDRESS"              , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM0_MASK"              , 0x0400 );
+        Constants.insert_or_assign( "KEY_NUM0_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM1_MASK"              , 0x0800 );
+        Constants.insert_or_assign( "KEY_NUM1_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM2_MASK"              , 0x1000 );
+        Constants.insert_or_assign( "KEY_NUM2_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM3_MASK"              , 0x2000 );
+        Constants.insert_or_assign( "KEY_NUM3_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM4_MASK"              , 0x4000 );
+        Constants.insert_or_assign( "KEY_NUM4_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM5_MASK"              , 0x8000 );
+        Constants.insert_or_assign( "KEY_NUM5_ADDRESS"           , 0xBCF1 );
+        Constants.insert_or_assign( "KEY_NUM6_MASK"              , 0x0001 );
+        Constants.insert_or_assign( "KEY_NUM6_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_NUM7_MASK"              , 0x0002 );
+        Constants.insert_or_assign( "KEY_NUM7_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_NUM8_MASK"              , 0x0004 );
+        Constants.insert_or_assign( "KEY_NUM8_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_NUM9_MASK"              , 0x0008 );
+        Constants.insert_or_assign( "KEY_NUM9_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_ESCAPE_MASK"            , 0x0010 );
+        Constants.insert_or_assign( "KEY_ESCAPE_ADDRESS"         , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_LCONTROL_MASK"          , 0x0020 );
+        Constants.insert_or_assign( "KEY_LCONTROL_ADDRESS"       , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_LSHIFT_MASK"            , 0x0040 );
+        Constants.insert_or_assign( "KEY_LSHIFT_ADDRESS"         , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_LALT_MASK"              , 0x0080 );
+        Constants.insert_or_assign( "KEY_LALT_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_LSYSTEM_MASK"           , 0x0100 );
+        Constants.insert_or_assign( "KEY_LSYSTEM_ADDRESS"        , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_RCONTROL_MASK"          , 0x0200 );
+        Constants.insert_or_assign( "KEY_RCONTROL_ADDRESS"       , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_RSHIFT_MASK"            , 0x0400 );
+        Constants.insert_or_assign( "KEY_RSHIFT_ADDRESS"         , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_RALT_MASK"              , 0x0800 );
+        Constants.insert_or_assign( "KEY_RALT_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_RSYSTEM_MASK"           , 0x1000 );
+        Constants.insert_or_assign( "KEY_RSYSTEM_ADDRESS"        , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_MENU_MASK"              , 0x2000 );
+        Constants.insert_or_assign( "KEY_MENU_ADDRESS"           , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_LBRACKET_MASK"          , 0x4000 );
+        Constants.insert_or_assign( "KEY_LBRACKET_ADDRESS"       , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_RBRACKET_MASK"          , 0x8000 );
+        Constants.insert_or_assign( "KEY_RBRACKET_ADDRESS"       , 0xBCF2 );
+        Constants.insert_or_assign( "KEY_SEMICOLON_MASK"         , 0x0001 );
+        Constants.insert_or_assign( "KEY_SEMICOLON_ADDRESS"      , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_COMMA_MASK"             , 0x0002 );
+        Constants.insert_or_assign( "KEY_COMMA_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_PERIOD_MASK"            , 0x0004 );
+        Constants.insert_or_assign( "KEY_PERIOD_ADDRESS"         , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_APOSTROPHE_MASK"        , 0x0008 );
+        Constants.insert_or_assign( "KEY_APOSTROPH_ADDRESS"      , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_SLASH_MASK"             , 0x0010 );
+        Constants.insert_or_assign( "KEY_SLASH_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_BACKSLASH_MASK"         , 0x0020 );
+        Constants.insert_or_assign( "KEY_BACKSLASH_ADDRESS"      , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_GRAVE_MASK"             , 0x0040 );
+        Constants.insert_or_assign( "KEY_GRAVE_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_EQUAL_MASK"             , 0x0080 );
+        Constants.insert_or_assign( "KEY_EQUAL_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_HYPHEN_MASK"            , 0x0100 );
+        Constants.insert_or_assign( "KEY_HYPHEN_ADDRESS"         , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_SPACE_MASK"             , 0x0200 );
+        Constants.insert_or_assign( "KEY_SPACE_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_ENTER_MASK"             , 0x0400 );
+        Constants.insert_or_assign( "KEY_ENTER_ADDRESS"          , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_BACKSPACE_MASK"         , 0x0800 );
+        Constants.insert_or_assign( "KEY_BACKSPACE_ADDRESS"      , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_TAB_MASK"               , 0x1000 );
+        Constants.insert_or_assign( "KEY_TAB_ADDRESS"            , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_PAGEUP_MASK"            , 0x2000 );
+        Constants.insert_or_assign( "KEY_PAGEUP_ADDRESS"         , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_PAGEDOWN_MASK"          , 0x4000 );
+        Constants.insert_or_assign( "KEY_PAGEDOWN_ADDRESS"       , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_END_MASK"               , 0x8000 );
+        Constants.insert_or_assign( "KEY_END_ADDRESS"            , 0xBCF3 );
+        Constants.insert_or_assign( "KEY_HOME_MASK"              , 0x0001 );
+        Constants.insert_or_assign( "KEY_HOME_ADDRESS"           , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_INSERT_MASK"            , 0x0002 );
+        Constants.insert_or_assign( "KEY_INSERT_ADDRESS"         , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_DELETE_MASK"            , 0x0004 );
+        Constants.insert_or_assign( "KEY_DELETE_ADDRESS"         , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_ADD_MASK"               , 0x0008 );
+        Constants.insert_or_assign( "KEY_ADD_ADDRESS"            , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_SUBTRACT_MASK"          , 0x0010 );
+        Constants.insert_or_assign( "KEY_SUBTRACT_ADDRESS"       , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_MULTIPLY_MASK"          , 0x0020 );
+        Constants.insert_or_assign( "KEY_MULTIPLY_ADDRESS"       , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_DIVIDE_MASK"            , 0x0040 );
+        Constants.insert_or_assign( "KEY_DIVIDE_ADDRESS"         , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_LEFT_MASK"              , 0x0080 );
+        Constants.insert_or_assign( "KEY_LEFT_ADDRESS"           , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_RIGHT_MASK"             , 0x0100 );
+        Constants.insert_or_assign( "KEY_RIGHT_ADDRESS"          , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_UP_MASK"                , 0x0200 );
+        Constants.insert_or_assign( "KEY_UP_ADDRESS"             , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_DOWN_MASK"              , 0x0400 );
+        Constants.insert_or_assign( "KEY_DOWN_ADDRESS"           , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD0_MASK"           , 0x0800 );
+        Constants.insert_or_assign( "KEY_NUMPAD0_ADDRESS"        , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD1_MASK"           , 0x1000 );
+        Constants.insert_or_assign( "KEY_NUMPAD1_ADDRESS"        , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD2_MASK"           , 0x2000 );
+        Constants.insert_or_assign( "KEY_NUMPAD2_ADDRESS"        , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD3_MASK"           , 0x4000 );
+        Constants.insert_or_assign( "KEY_NUMPAD3_ADDRESS"        , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD4_MASK"           , 0x8000 );
+        Constants.insert_or_assign( "KEY_NUMPAD4_ADDRESS"        , 0xBCF4 );
+        Constants.insert_or_assign( "KEY_NUMPAD5_MASK"           , 0x0001 );
+        Constants.insert_or_assign( "KEY_NUMPAD5_ADDRESS"        , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_NUMPAD6_MASK"           , 0x0002 );
+        Constants.insert_or_assign( "KEY_NUMPAD6_ADDRESS"        , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_NUMPAD7_MASK"           , 0x0004 );
+        Constants.insert_or_assign( "KEY_NUMPAD7_ADDRESS"        , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_NUMPAD8_MASK"           , 0x0008 );
+        Constants.insert_or_assign( "KEY_NUMPAD8_ADDRESS"        , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_NUMPAD9_MASK"           , 0x0010 );
+        Constants.insert_or_assign( "KEY_NUMPAD9_ADDRESS"        , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F1_MASK"                , 0x0020 );
+        Constants.insert_or_assign( "KEY_F1_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F2_MASK"                , 0x0040 );
+        Constants.insert_or_assign( "KEY_F2_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F3_MASK"                , 0x0080 );
+        Constants.insert_or_assign( "KEY_F3_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F4_MASK"                , 0x0100 );
+        Constants.insert_or_assign( "KEY_F4_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F5_MASK"                , 0x0200 );
+        Constants.insert_or_assign( "KEY_F5_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F6_MASK"                , 0x0400 );
+        Constants.insert_or_assign( "KEY_F6_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F7_MASK"                , 0x0800 );
+        Constants.insert_or_assign( "KEY_F7_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F8_MASK"                , 0x1000 );
+        Constants.insert_or_assign( "KEY_F8_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F9_MASK"                , 0x2000 );
+        Constants.insert_or_assign( "KEY_F9_ADDRESS"             , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F10_MASK"               , 0x4000 );
+        Constants.insert_or_assign( "KEY_F10_ADDRESS"            , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F11_MASK"               , 0x8000 );
+        Constants.insert_or_assign( "KEY_F11_ADDRESS"            , 0xBCF5 );
+        Constants.insert_or_assign( "KEY_F12_MASK"               , 0x0001 );
+        Constants.insert_or_assign( "KEY_F12_ADDRESS"            , 0xBCF6 );
+        Constants.insert_or_assign( "KEY_F13_MASK"               , 0x0002 );
+        Constants.insert_or_assign( "KEY_F13_ADDRESS"            , 0xBCF6 );
+        Constants.insert_or_assign( "KEY_F14_MASK"               , 0x0004 );
+        Constants.insert_or_assign( "KEY_F14_ADDRESS"            , 0xBCF6 );
+        Constants.insert_or_assign( "KEY_F15_MASK"               , 0x0008 );
+        Constants.insert_or_assign( "KEY_F15_ADDRESS"            , 0xBCF6 );
+        Constants.insert_or_assign( "KEY_PAUSE_MASK"             , 0x0010 );
+        Constants.insert_or_assign( "KEY_PAUSE_ADDRESS"          , 0xBCF6 );
+
+        
+        Constants.insert_or_assign( "CPU_SCREEN_SIZE"    , CPU_SCREEN_SIZE    );
+        Constants.insert_or_assign( "CPU_LAST_INDEX"     , CPU_LAST_INDEX     );
+        Constants.insert_or_assign( "CPU_VRAM_START"     , CPU_VRAM_START     );
+        Constants.insert_or_assign( "CPU_STACK_START"    , CPU_STACK_START    );
+        Constants.insert_or_assign( "CPU_ROM_START"      , CPU_ROM_START      );
+        Constants.insert_or_assign( "CPU_RAM_START"      , CPU_RAM_START      );
+        Constants.insert_or_assign( "CPU_RAND_01"        , CPU_RAND_01        );
+        Constants.insert_or_assign( "CPU_RAND_02"        , CPU_RAND_02        );
+        Constants.insert_or_assign( "CPU_RAND_03"        , CPU_RAND_03        );
+        Constants.insert_or_assign( "CPU_RAND_04"        , CPU_RAND_04        );
+        Constants.insert_or_assign( "CPU_KEYSTATE_START" , CPU_KEYSTATE_START );
+
     }
 
 }

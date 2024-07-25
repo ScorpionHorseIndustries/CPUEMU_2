@@ -8,6 +8,7 @@ namespace sh {
         k.erase(std::remove(k.begin(), k.end(), ':'), k.end());
         k.erase(std::remove(k.begin(), k.end(), '#'), k.end());
         k.erase(std::remove(k.begin(), k.end(), '@'), k.end());
+        k.erase(std::remove(k.begin(), k.end(), '!'), k.end());
 
         return k;
 

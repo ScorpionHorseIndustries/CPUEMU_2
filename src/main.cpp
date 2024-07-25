@@ -22,6 +22,24 @@ int main(int argc, char* argv[]) {
 
     }
 
+    u16 pos = 0;
+    for (int i = 0; i < sf::Keyboard::KeyCount; i += 16) {
+        // u16 k = 0;
+        for (int j = 0; j < 16; j += 1) {
+            if (i + j >= sf::Keyboard::KeyCount) {
+                break;
+            }
+
+            
+            std::cout << std::format("MASK          {:04x}\n", (1 << j));
+            std::cout << std::format("ADDRESS       {:04x}\n", sh::CPU_KEYSTATE_START+pos);
+            
+        }
+        pos += 1;
+        
+        
+    }
+
     std::cout << R"USEAGE999( 
 
     #####################################################

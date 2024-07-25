@@ -8,21 +8,21 @@ loop:
 
 
 draw_pixel:
-    LODA $befc
+    LODA !CPU_RAND_01
     STRA @colour
-    LODA $befd
+    LODA !CPU_RAND_02
     STRA @px
-    LODA $befe
+    LODA !CPU_RAND_03
     STRA @py
 
     LODA @py
-    LODB #128
+    LODB #!CPU_SCREEN_SIZE
     MULT B
     LODB @px
     ADDC B
     MOVE A,B
     LODA @colour
-    STRA $bf00,B
+    STRA !CPU_VRAM_START,B
     RSUB
 
 end:

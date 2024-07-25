@@ -50,6 +50,7 @@ namespace sh {
                 LABEL_DECLARE       ,
                 REGISTER            ,
                 REGISTER_PAIR       ,
+                CONSTANT            ,
                 OTHER               ,
                 INVALID             = 0xff,
 
@@ -60,6 +61,7 @@ namespace sh {
                 DEC,
                 LBL,
                 VAR,
+                CNS,    //CONSTANT
                 REG,
                 RGP     //register pair
             };
@@ -77,6 +79,7 @@ namespace sh {
                 { REGISTER_PAIR         , "REGISTER_PAIR"           },
                 { OTHER                 , "OTHER"                   },
                 { INVALID               , "INVALID"                 },
+                { CONSTANT              , "CONSTANT"                 },
                
                
             };
@@ -132,6 +135,7 @@ namespace sh {
                 bool isVar;
             };
             std::map<std::string, Label> Labels;
+            std::map<std::string, u16> Constants;
 
             bool ParseFromFile(std::string input_path, std::string output_path);
             bool LoadFile(std::string path);
@@ -140,8 +144,10 @@ namespace sh {
             std::vector<Token> Tokenise(const std::string& ln);
             bool LabelExists(std::string lbl);
             Label& LabelGet(std::string lbl);
+            u16 ConstantGet(std::string constant_name);
             void LabelSet(std::string lbl, u16 address, bool isVar = false);
             std::vector<u16> bytes;
+            void BuildConstants();
             
      
             void PrintTokenLines() {
@@ -163,32 +169,39 @@ namespace sh {
             };
             
             inline static const std::vector<RegexGrammarToken> REGEX_GRAMMAR = {
-                { std::regex( R"rgx987(#\$[\dA-Fa-f]+)rgx987"                  ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, HEX },          
+                { std::regex( R"rgx987(#\$[\dA-F]+)rgx987"                     ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, HEX },          
                 { std::regex( R"rgx987(#\d+)rgx987"                            ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, DEC },
-                { std::regex( R"rgx987(\$[\dA-Fa-f]+)rgx987"                   ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, HEX },          
-                { std::regex( R"rgx987(\$[\dA-Fa-f]+,B)rgx987"                 ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, HEX },        
-                { std::regex( R"rgx987(\$[\dA-Fa-f]+,C)rgx987"                 ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, HEX },
+                { std::regex( R"rgx987(#![A-Z][A-Z_0-9]+)rgx987"               ,std::regex::icase), NUMERIC_LITERAL, CPU::ADDRESS_MODES::IMM, CNS },        
+                { std::regex( R"rgx987(\$[\dA-F]+)rgx987"                      ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, HEX },          
+                { std::regex( R"rgx987(\$[\dA-F]+,B)rgx987"                    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, HEX },        
+                { std::regex( R"rgx987(\$[\dA-F]+,C)rgx987"                    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, HEX },
                 { std::regex( R"rgx987(\d+)rgx987"                             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, DEC },
                 { std::regex( R"rgx987(\d+,B)rgx987"                           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, DEC },
                 { std::regex( R"rgx987(\d+,C)rgx987"                           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, DEC },
-                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+)rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
-                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+,B)rgx987"        ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
-                { std::regex( R"rgx987(@[a-zA-Z][a-zA-Z_0-9]+,C)rgx987"        ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
-                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+)rgx987"           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
-                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+,B)rgx987"         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
-                { std::regex( R"rgx987([a-zA-Z][a-zA-Z_0-9]+,C)rgx987"         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
-                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+\))rgx987"               ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::IND, HEX },
-                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+,B\))rgx987"             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INB, HEX },
-                { std::regex( R"rgx987(\(\$[\dA-Fa-f]+\),C)rgx987"             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INC, HEX },
+                { std::regex( R"rgx987(@[A-Z][A-Z_0-9]+)rgx987"                ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
+                { std::regex( R"rgx987(@[A-Z][A-Z_0-9]+,B)rgx987"              ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
+                { std::regex( R"rgx987(@[A-Z][A-Z_0-9]+,C)rgx987"              ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
+                { std::regex( R"rgx987(![A-Z][A-Z_0-9]+)rgx987"                ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, CNS },        
+                { std::regex( R"rgx987(![A-Z][A-Z_0-9]+,B)rgx987"              ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, CNS },
+                { std::regex( R"rgx987(![A-Z][A-Z_0-9]+,C)rgx987"              ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, CNS },                
+                { std::regex( R"rgx987([A-Z][A-Z_0-9]+)rgx987"                 ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
+                { std::regex( R"rgx987([A-Z][A-Z_0-9]+,B)rgx987"               ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
+                { std::regex( R"rgx987([A-Z][A-Z_0-9]+,C)rgx987"               ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
+                { std::regex( R"rgx987(\(\$[\dA-F]+\))rgx987"                  ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::IND, HEX },
+                { std::regex( R"rgx987(\(\$[\dA-F]+,B\))rgx987"                ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INB, HEX },
+                { std::regex( R"rgx987(\(\$[\dA-F]+\),C)rgx987"                ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::INC, HEX },
                 { std::regex( R"rgx987(\(\d+\))rgx987"                         ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, DEC },
                 { std::regex( R"rgx987(\(\d+,B\))rgx987"                       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, DEC },
                 { std::regex( R"rgx987(\(\d+\),C)rgx987"                       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, DEC },
-                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+\))rgx987"      ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
-                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+,B\))rgx987"    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
-                { std::regex( R"rgx987(\(@[a-zA-Z][a-zA-Z_0-9]+\),C)rgx987"    ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
-                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+\))rgx987"       ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
-                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+,B\))rgx987"     ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
-                { std::regex( R"rgx987(\([a-zA-Z][a-zA-Z_0-9]+\),C)rgx987"     ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
+                { std::regex( R"rgx987(\(@[A-Z][A-Z_0-9]+\))rgx987"            ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, VAR },        
+                { std::regex( R"rgx987(\(@[A-Z][A-Z_0-9]+,B\))rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, VAR },
+                { std::regex( R"rgx987(\(@[A-Z][A-Z_0-9]+\),C)rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, VAR },
+                { std::regex( R"rgx987(\(![A-Z][A-Z_0-9]+\))rgx987"            ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, CNS },        
+                { std::regex( R"rgx987(\(![A-Z][A-Z_0-9]+,B\))rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, CNS },
+                { std::regex( R"rgx987(\(![A-Z][A-Z_0-9]+\),C)rgx987"          ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, CNS },                
+                { std::regex( R"rgx987(\([A-Z][A-Z_0-9]+\))rgx987"             ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABS, LBL },
+                { std::regex( R"rgx987(\([A-Z][A-Z_0-9]+,B\))rgx987"           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABB, LBL },
+                { std::regex( R"rgx987(\([A-Z][A-Z_0-9]+\),C)rgx987"           ,std::regex::icase), ADDRESS_LITERAL, CPU::ADDRESS_MODES::ABC, LBL },
                 { std::regex( R"rgx987([ABCXYZ],[ABCXYZ])rgx987"               ,std::regex::icase), REGISTER_PAIR  , CPU::ADDRESS_MODES::RG2, RGP },
                 { std::regex( R"rgx987(A)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGA, REG },
                 { std::regex( R"rgx987(B)rgx987"                               ,std::regex::icase), REGISTER       , CPU::ADDRESS_MODES::RGB, REG },

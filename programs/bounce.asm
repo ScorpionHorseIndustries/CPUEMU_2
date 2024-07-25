@@ -9,10 +9,15 @@ loop:
 
 
 update_ball:
+
+    
+
+update_ball_x_pos:
     LODA @pos_x
-    LODB @vel_x
-    ADDC B
+    INCR A
     COMP #127
+
+update_ball_x_neg:
 
 
 draw_ball:
