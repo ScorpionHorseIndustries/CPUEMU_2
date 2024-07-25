@@ -63,16 +63,18 @@ int main(int argc, char* argv[]) {
                             Required: -i, -o
   -r, --run             Run a program 
                             Required: -i
+                
       --debug           Show Debug output when running (slow)
   -i, --input           Input File 
   -o, --output          Output File
   -w, --window          Open Window
+      --print-tokens    Print Tokens when compiling
 )USEAGE999" << std::endl;
         return 0;
     }
 
     bool useWindow = (sh::Funcs::CmdOptionExists("-w", "--window"));
-
+    assembler.printTokens = sh::Funcs::CmdOptionExists("--print-tokens");
     bool ok = true;
     int return_value = 0;
     if (sh::Funcs::CmdOptionExists("-c", "--compile")) {

@@ -149,7 +149,7 @@ namespace sh {
             std::vector<u16> bytes;
             void BuildConstants();
             
-     
+            bool printTokens = false;
             void PrintTokenLines() {
                 std::cout << "Print token Lines:" << std::endl;
                 for (const auto& tl : lines) {

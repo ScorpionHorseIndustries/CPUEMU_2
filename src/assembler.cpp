@@ -162,6 +162,24 @@ namespace sh {
             }
         }
 
+        if (printTokens) {
+            for (auto& out : outputLines) {
+                if (out.instruction > 0) {
+                    std::cout << 
+                        std::format("{:8} {:8}", 
+                            CPU::GetInstructionFullName(out.instruction), 
+                            CPU::GetAddressModeFullName(out.address_mode));
+
+                    if (out.length > 1) {
+                        std::cout << std::format(" {:04x}  {}", out.value, out.label);
+                    }
+                    std::cout << "\n";
+                }
+            }
+        }
+
+
+
         std::ofstream file;
         file.open(output_file_path, std::ios::out | std::ios_base::binary);
         if (!file.is_open()) throw std::runtime_error("file not open");
@@ -254,6 +272,10 @@ namespace sh {
 
                 
             }
+        }
+
+        if (printTokens) {
+            PrintTokenLines();
         }
         return lines.size() > 0;
     }
@@ -375,6 +397,11 @@ namespace sh {
 
 
         Constants.clear();
+        Constants.insert_or_assign( "COLOUR_WHITE"               , 0xffff );
+        Constants.insert_or_assign( "COLOUR_BLACK"               , 0x0000 );
+        Constants.insert_or_assign( "COLOUR_RED"                 , 0x7800 );
+        Constants.insert_or_assign( "COLOUR_GREEN"               , 0x03E0 );
+        Constants.insert_or_assign( "COLOUR_BLUE"                , 0x001F );
         Constants.insert_or_assign( "KEY_A_MASK"                 , 0x0001 );
         Constants.insert_or_assign( "KEY_A_ADDRESS"              , 0xBCF0 );
         Constants.insert_or_assign( "KEY_B_MASK"                 , 0x0002 );

@@ -52,7 +52,7 @@ namespace sh {
             for (int i = 0; i < keys.size(); i += 16) {
                 u16 k = 0;
                 for (int j = 0; j < 16; j += 1) {
-                    if (i + j > sf::Keyboard::KeyCount < 1) {
+                    if (i + j >= sf::Keyboard::KeyCount) {
                         break;
                     }
 
@@ -88,13 +88,25 @@ namespace sh {
                     }
                 }
             }
+
+            if (keys[sf::Keyboard::Key::A].pressed) {
+                screenBuffer.setPixel(SFML_WINDOW_WIDTH-10, SFML_WINDOW_HEIGHT-10, sf::Color::White);
+
+            } else {
+                screenBuffer.setPixel(SFML_WINDOW_WIDTH-10, SFML_WINDOW_HEIGHT-10, sf::Color::Black);            
+            }
+
+            auto v = cpu.memory[CPU_KEYSTATE_START];
+            
             
             tex.update(screenBuffer);
+
             //DRAW GUI
             
             window.clear();
             
             window.draw(sf::Sprite(tex));
+
 
             window.display();
         }
