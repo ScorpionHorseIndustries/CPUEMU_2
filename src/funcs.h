@@ -41,7 +41,7 @@ namespace sh {
         // char* GetCmdOption(char ** begin, char ** end, const std::string& option);
         static bool AllInList(const std::string& str, const std::string list);
         static sf::Color GetColour(u16 c);
-
+        static int GetInt(std::string& str);
         static void Message(std::string msg);
     };
 }   

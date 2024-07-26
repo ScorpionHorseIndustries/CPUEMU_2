@@ -2,6 +2,9 @@
 
 namespace sh {
 
+    Assembler::Assembler() {
+        BuildConstants();
+    }
     bool Assembler::ParseFromFile(std::string input_path, std::string output_path) {
 
         input_file_path = input_path;
@@ -60,7 +63,7 @@ namespace sh {
 
     bool Assembler::Assemble() {
         Funcs::Message("Attempting `Assemlby`...");
-        BuildConstants();
+        
         // std::vector<Output> outputLines;
         outputLines.clear();
         u16 byte_position = 0;
@@ -164,17 +167,26 @@ namespace sh {
 
         if (printTokens) {
             for (auto& out : outputLines) {
+
                 if (out.instruction > 0) {
-                    std::cout << 
-                        std::format("{:8} {:8}", 
+                    std::cout <<
+                        std::format("[{:04x}] {:8} {:8}", 
+                            out.address,
                             CPU::GetInstructionFullName(out.instruction), 
                             CPU::GetAddressModeFullName(out.address_mode));
 
                     if (out.length > 1) {
                         std::cout << std::format(" {:04x}  {}", out.value, out.label);
                     }
-                    std::cout << "\n";
+                } else {
+                    std::cout <<
+                        std::format("{:5} {:04x} {}",
+                        out.isDeclareLabel,
+                        out.value,
+                        out.label
+                    );
                 }
+                std::cout << "\n";
             }
         }
 
@@ -218,7 +230,7 @@ namespace sh {
 
 
         auto elements = Funcs::SplitString(cpy,' ');
-
+        bool doNotAdd = false;
         if (elements.size() == 1) {
             if (elements[0].ends_with(':')) {
                 //declare label
@@ -235,12 +247,16 @@ namespace sh {
         } else if (elements.size() == 2) {
             if (CPU::GetInstructionCode(elements[0]) > 0) {
                 tokens.push_back({elements[0], KEYWORD});
+            } else if (elements[0].starts_with('!')) {
+                Constants.insert_or_assign(Funcs::GetKey(elements[0]), Funcs::GetInt(elements[1]));
+                doNotAdd = true;
             } else {
                 // error
                 tokens.push_back({elements[0], INVALID});
             }
-
-            tokens.push_back({elements[1], OTHER});
+            if (!doNotAdd) {
+                tokens.push_back({elements[1], OTHER});
+            }
         }
 
         return tokens;
@@ -283,6 +299,8 @@ namespace sh {
     std::string Assembler::Token::str() const {
         return std::format("[{}[{}][{}][{}]]",value, TOKEN_TYPE_NAMES.at(type), value_int, sub_value);
     }
+
+
 
     Assembler::Token::Token(std::string _value, TOKEN_TYPE _type) : value(_value), type(_type) {
         std::string int_to_parse = "";

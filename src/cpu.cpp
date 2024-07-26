@@ -348,37 +348,37 @@ namespace sh {
             case BAND: {
                 Fetch();
                 A = A & fetched;
-                flags.ZERO = temp & 0xffff == 0;
-                flags.NEGATIVE = temp & 0x8000 != 0;                
+                flags.ZERO = A & 0xffff == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;                
 
                 break;
             }
             case BBOR: {
                 Fetch();
                 A = A | fetched;
-                flags.ZERO = temp & 0xffff == 0;
-                flags.NEGATIVE = temp & 0x8000 != 0;                            
+                flags.ZERO = A & 0xffff == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;                            
                 break;
             }
             case BNOR: {
                 Fetch();
                 A = ~(A | fetched);
-                flags.ZERO = temp & 0xffff == 0;
-                flags.NEGATIVE = temp & 0x8000 != 0;                            
+                flags.ZERO = A & 0xffff == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;                            
                 break;
             }
             case BXOR: {
                 Fetch();
                 A = A ^ fetched;
-                flags.ZERO = temp & 0xffff == 0;
-                flags.NEGATIVE = temp & 0x8000 != 0;                            
+                flags.ZERO = A & 0xffff == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;                            
                 break;
             }
             case BSHL: {
                 Fetch();
                 A = A << (fetched & 0xf);
-                flags.ZERO = temp & 0xffff == 0;
-                flags.NEGATIVE = temp & 0x8000 != 0;                                            
+                flags.ZERO = A & 0xffff == 0;
+                flags.NEGATIVE = A & 0x8000 != 0;                                            
                 break;
             }
             case BSHR: {

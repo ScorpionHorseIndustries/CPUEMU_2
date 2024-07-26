@@ -11,10 +11,9 @@
             "program": "${workspaceFolder}\\build\\bin\\cpuemu.exe",
             "args": [
                 "-i",
-                "programs\\all.asm",
-                "-o",
-                "execs\\all.exec",
-                "--compile"
+                "execs\\test-keys.mem",
+                "--run",
+                "--window"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

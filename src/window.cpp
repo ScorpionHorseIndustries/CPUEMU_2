@@ -3,7 +3,11 @@
 namespace sh {
 
     Window::Window() {
-        keys.fill({});
+        font_vcr.loadFromFile("fonts\\vcr.TTF");
+
+
+        
+
 
     }
 
@@ -97,7 +101,19 @@ namespace sh {
             }
 
             auto v = cpu.memory[CPU_KEYSTATE_START];
-            
+            sf::Text text(std::format("{:04x}", v), font_vcr);
+            text.setCharacterSize(14);
+            text.setFillColor(sf::Color::White);
+            text.setPosition(SFML_WINDOW_WIDTH / 2, SFML_WINDOW_HEIGHT / 2);
+            sf::Color c(255,0,0);
+            for (int n = 0; n < 16; n += 1) {
+                
+                c.g = c.b = ((v & (1 << n)) ? 255 : 0);
+                
+                screenBuffer.setPixel(SFML_WINDOW_WIDTH-10-n, SFML_WINDOW_HEIGHT-12, c);  
+                screenBuffer.setPixel(SFML_WINDOW_WIDTH-10-n, SFML_WINDOW_HEIGHT-13, c);  
+                screenBuffer.setPixel(SFML_WINDOW_WIDTH-10-n, SFML_WINDOW_HEIGHT-14, c);  
+            }
             
             tex.update(screenBuffer);
 
@@ -106,6 +122,7 @@ namespace sh {
             window.clear();
             
             window.draw(sf::Sprite(tex));
+            window.draw(text);
 
 
             window.display();

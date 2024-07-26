@@ -1,3 +1,6 @@
+!COLOUR_PURPLE   $7C1F
+
+
 LODA #$00
 STRA @test_key_address
 STRA @test_key_mask
@@ -22,13 +25,10 @@ after_draw:
 
 draw_white:
     LODA #!COLOUR_WHITE
-    STRA @colour
     JUMP draw_pixel
 draw_black:
-    LODA #!COLOUR_BLACK
-    STRA @colour
+    LODA #!COLOUR_PURPLE
 draw_pixel:
-    LODA #$ffff
     STRA !CPU_VRAM_START
     JUMP after_draw
 

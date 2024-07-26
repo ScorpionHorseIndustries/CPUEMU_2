@@ -6,6 +6,7 @@ namespace sh {
     class Window {
 
         public:
+        sf::Font font_vcr;
         struct KeyState {
             bool pressed= false;
             bool justPressed = false;

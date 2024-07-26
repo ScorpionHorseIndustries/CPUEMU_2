@@ -146,6 +146,39 @@ namespace sh {
 
     }
 
+    int Funcs::GetInt(std::string& str) {
+        int returnValue = 0;
+        std::string cpy = std::string(str);
+        Funcs::Remove(cpy, '#');
+        std::string intStr = "";
+        bool readDec = true;
+        bool readHex = false;
+        for (char c : cpy) {
+            if (c == '$') {
+                readHex = true;
+                continue;
+            }
+
+            if (c == ')') break;
+            if (c == ',') break;
+
+            if (Funcs::CharInList(c, DECIMAL_CHARS)) {
+                intStr += c;
+            }
+
+            if (readHex && Funcs::CharInList(c, HEX_CHARS)) {
+                intStr += c;
+            }
+        }
+
+        if (intStr.length() > 0) {
+            returnValue = std::stoi(intStr, nullptr, readHex ? 16 : 10);
+        }
+
+        return returnValue;
+        
+    }
+
     std::string Funcs::GetCmdOption( const std::string& option)
     {
         // char ** begin = *sh::CmdArguments;
