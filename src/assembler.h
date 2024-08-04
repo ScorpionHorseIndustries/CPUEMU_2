@@ -138,7 +138,7 @@ namespace sh {
             };
             std::map<std::string, Label> Labels;
             std::map<std::string, u16> Constants;
-
+            bool ParseFromText(const std::string& text, std::string output_path);
             bool ParseFromFile(std::string input_path, std::string output_path);
             bool LoadFile(std::string path);
             bool Tokenise();

@@ -22,23 +22,23 @@ int main(int argc, char* argv[]) {
 
     }
 
-    u16 pos = 0;
-    for (int i = 0; i < sf::Keyboard::KeyCount; i += 16) {
-        // u16 k = 0;
-        for (int j = 0; j < 16; j += 1) {
-            if (i + j >= sf::Keyboard::KeyCount) {
-                break;
-            }
+    // u16 pos = 0;
+    // for (int i = 0; i < sf::Keyboard::KeyCount; i += 16) {
+    //     // u16 k = 0;
+    //     for (int j = 0; j < 16; j += 1) {
+    //         if (i + j >= sf::Keyboard::KeyCount) {
+    //             break;
+    //         }
 
             
-            std::cout << std::format("MASK          {:04x}\n", (1 << j));
-            std::cout << std::format("ADDRESS       {:04x}\n", sh::CPU_KEYSTATE_START+pos);
+    //         std::cout << std::format("MASK          {:04x}\n", (1 << j));
+    //         std::cout << std::format("ADDRESS       {:04x}\n", sh::CPU_KEYSTATE_START+pos);
             
-        }
-        pos += 1;
+    //     }
+    //     pos += 1;
         
         
-    }
+    // }
 
     std::cout << R"USEAGE999( 
 
@@ -73,11 +73,22 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    bool useWindow = (sh::Funcs::CmdOptionExists("-w", "--window"));
+    bool useWindow  = sh::Funcs::CmdOptionExists("-w", "--window");
+    bool compile    = sh::Funcs::CmdOptionExists("-c", "--compile");
+    bool tests      = sh::Funcs::CmdOptionExists("-t", "--tests");
+    bool run        = sh::Funcs::CmdOptionExists("-r", "--run");
     assembler.printTokens = sh::Funcs::CmdOptionExists("--print-tokens");
+
     bool ok = true;
     int return_value = 0;
-    if (sh::Funcs::CmdOptionExists("-c", "--compile")) {
+
+    if (tests) {
+        sh::TestRunner tests;
+        tests.Load();
+        tests.Run();
+
+
+    } else if (compile) {
 
         input_file_path = sh::Funcs::GetCmdOption("-i", "--input");
         output_file_path = sh::Funcs::GetCmdOption("-o", "--output");
@@ -90,7 +101,7 @@ int main(int argc, char* argv[]) {
             return_value = -1;
         }
 
-    } else if (sh::Funcs::CmdOptionExists("-r", "--run")) {
+    } else if (run) {
 
         input_file_path = sh::Funcs::GetCmdOption("-i", "--input");
 

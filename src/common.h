@@ -2,6 +2,7 @@
 #define __COMMON_H_
 
 
+#include <filesystem>
 #include <iostream>
 #include <cstdint>
 #include <stdfloat>
@@ -22,6 +23,7 @@
 #include "cpu.h"
 #include "window.h"
 #include "assembler.h"
+#include "tests.h"
 
 
 

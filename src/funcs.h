@@ -26,6 +26,7 @@ namespace sh {
         static void Remove(std::string &s, char remove_me);
         static void Replace(std::string& s, char replace_me, char with_me);
         static std::vector<std::string> SplitString(const std::string& str, char delim);
+        static void MakeSafeFileName(std::string& s);
 
         static bool CharInList(char c, const std::string list);
         static bool IsIdentStart(char c);

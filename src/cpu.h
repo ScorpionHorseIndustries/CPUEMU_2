@@ -10,7 +10,7 @@ namespace sh {
 
             enum INSTRUCTIONS : u8{
                 //          
-                ADDC=0x01,      //         A = A + data :: add with carry    
+                ADDC=0x10,      //         A = A + data :: add with carry    
                 SUBC,           //         A = A - data :: subtract with borrow
                 MULT,           //         A = A * data :: multiply
                 COMP,           //         Compare two registers, sets lt, gt, eq flags
@@ -113,6 +113,7 @@ namespace sh {
             static u16 MakeReg2(u8 _from, u8 to);
             bool LoadProgram(std::string path);
             void PrintNonZeroMemory();
+            void Reset();
             std::string str();
             
 

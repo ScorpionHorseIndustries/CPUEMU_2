@@ -18,13 +18,12 @@ loop:
     JMPE draw_white
     JUMP draw_black
 after_draw:
-
     JUMP loop
 
 
 
 draw_white:
-    LODA #!COLOUR_WHITE
+    LODA #!COLOUR_BLACK
     JUMP draw_pixel
 draw_black:
     LODA #!COLOUR_PURPLE

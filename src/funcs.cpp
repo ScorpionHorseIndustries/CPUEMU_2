@@ -21,6 +21,23 @@ namespace sh {
             
     }
 
+    void Funcs::MakeSafeFileName(std::string& s) {
+        if (AllInList(s,FILENAME_CHARS)) {
+            return;
+        } else {
+            std::string output = "";
+            for (char c : s) {
+                if (CharInList(c, FILENAME_CHARS)) {
+                    output += c;
+                } else {
+                    output += '_';
+                }
+            }
+
+            s = output;
+        }
+    }
+
     std::string Funcs::ToUpper(const std::string str) {
         std::string k = str.substr(0);
         

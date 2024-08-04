@@ -15,7 +15,7 @@ typedef double          f64;
 
 #define IDENT_START     "@:abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define IDENT_MIDDLE    ":abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
-
+#define FILENAME_CHARS  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-."
 #define KEYWORD_CHARS   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define NUMERIC_START   "#$0123456789ABCDEFabcdef"
 #define NUMERIC_MIDDLE  "$0123456789ABCDEFabcdef"

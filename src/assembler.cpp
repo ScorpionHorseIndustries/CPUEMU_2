@@ -5,6 +5,26 @@ namespace sh {
     Assembler::Assembler() {
         BuildConstants();
     }
+
+    bool Assembler::ParseFromText(const std::string& text, std::string output_path) {
+        output_file_path = output_path;
+
+        data = std::string(text);
+        bool ok = true;
+        ok = data.length() > 0;
+        
+        if (ok) {
+            ok = Tokenise();
+        }
+
+        if (ok) {
+            ok = Assemble();
+        
+        }
+        
+
+        return ok;
+    }
     bool Assembler::ParseFromFile(std::string input_path, std::string output_path) {
 
         input_file_path = input_path;

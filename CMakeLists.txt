@@ -5,6 +5,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+# set(BOOST_ROOT "$ENV{BOOST_DIR}")
+#BOOST
+
+
+
 
 include(FetchContent)
 
@@ -20,10 +25,11 @@ set(SOURCE_FILES
     src/cpu.cpp
     src/window.cpp
     src/funcs.cpp
+    src/tests.cpp
 )
 # set(SFML_DIR "S:\\dev\\cpplibs\\SFML-2.6.1\\lib\\cmake\\SFML")
 # set(SFML_STATIC_LIBRARIES TRUE)
-
+link_directories(${Boost_LIBRARY_DIRS})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
@@ -39,6 +45,7 @@ target_link_libraries(${PROJECT_NAME}
     opengl32
     winmm
     gdi32
+    
     )
 
 # if(WIN32)

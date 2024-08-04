@@ -2,67 +2,7 @@
 
 namespace sh {
     CPU::CPU() {
-        memory.fill(0);
-
-        A = B = C = X = Y = Z = 0;
-        instruction = 0;
-        address_absolute = 0;
-        address_mode = 0;
-        stackPointer = 0;
-
-        // for (auto [instr,amlist] : VALID_OPCODES_LOOKUP) {
-            
-        //     for (auto am : amlist) {
-        //         u16 opcode = ((instr << 8) & 0xff00) | (am & 0x00ff);
-        //         if (std::find(ValidOpcodes.begin(), ValidOpcodes.end(), opcode) == ValidOpcodes.end()) {
-        //             ValidOpcodes.push_back(opcode);
-        //         }
-        //     }
-        // }
-
-        //write a program
-        // mwAddress = 0;
-
-        // u16 loop_address = 0;
-        // mwWrite(LODA, IMM, 0);
-        // mwWrite(STRA, ABS, CPU_RAM_START);
-        // loop_address = mwAddress;
-        // mwWrite(LODA, ABS, CPU_RAM_START);
-        // mwWrite(INCR, RGA);
-        // mwWrite(STRA, ABS, CPU_RAM_START);
-        // mwWrite(FCST);
-        // mwWrite(SUBC, IMM, 3);
-        // mwWrite(FCCL);
-        // mwWrite(JMPZ, ABS, mwAddress+4);
-        // mwWrite(JUMP, ABS, loop_address);
-        // mwWrite(HALT);
-
-        
-
-        // mwWrite(LODA, IMM, 0);
-        // mwWrite(INCR, RGA);
-        // mwWrite(FCST, IMP); //set carry so subtraction works properly
-        // mwWrite(SUBC, IMM, 1);
-        
-        // mwWrite(HALT,IMP);
-
-        // u16 address_loop;
-        // mwWrite(LODA, IMM, 0, true);                //2
-        // mwWrite(STRA, ABS, CPU_RAM_START, true);    //2
-        // // mwWrite(INCR, RGB);             
-        // // mwWrite(MOVE, RG2, MakeReg2(REG_INDEX::RIB, REG_INDEX::RIC), true); //5
-        // address_loop = mwAddress;
-        // mwWrite(LODA, ABS, CPU_RAM_START, true); //2
-        // mwWrite(INCR, RGA);                     //1
-        // mwWrite(STRA, ABS, CPU_RAM_START, true);//2
-        // mwWrite(FCCL, IMP);//1
-        // mwWrite(SUBC, IMM, 20, true);
-        // mwWrite(JMPZ, ABS, 18, true);   //8
-        // mwWrite(JUMP, ABS, address_loop, true);    //10
-        
-        // mwWrite(HALT, IMP);             //18
-        
-        PC = 0;
+        Reset();
     }
 
     void CPU::PrintNonZeroMemory() {
@@ -91,6 +31,18 @@ namespace sh {
         }
     }
 
+    void CPU::Reset() {
+        memory.fill(0);
+
+        A = B = C = X = Y = Z = 0;
+        instruction = 0;
+        address_absolute = 0;
+        address_mode = 0;
+        stackPointer = 0;
+
+        PC = 0;
+
+    }
 
     u16 CPU::MakeReg2(u8 _from, u8 to) {
         return (_from << 8) | (to&0xff);
@@ -123,7 +75,7 @@ namespace sh {
             }
 
             delete[] buffer;
-            PrintNonZeroMemory();
+            //PrintNonZeroMemory();
         } else {
             std::cout << "file could not be opened" << std::endl;
             ok = false;
