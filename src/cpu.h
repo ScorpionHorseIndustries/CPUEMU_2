@@ -131,6 +131,8 @@ namespace sh {
                 bool GREATER_THAN = false;
                 bool EQUAL = false;
             } flags;
+
+            
             
             CPU();
             void Tick();
@@ -408,6 +410,20 @@ namespace sh {
 
             };
 
+            inline static const std::map<char, u8> FLAG_INDICES = {
+                {'H', 0 },
+                {'C', 1 },
+                {'N', 2 },
+                {'Z', 3 },
+                {'O', 4 },
+                {'V', 4 },
+                {'F', 5 },
+                {'L', 6 },
+                {'G', 7 },
+                {'E', 8 },
+
+            };
+
 
             inline static std::string GetInstructionName(u8 __instr) {
                 if (INSTRUCTION_NAMES.contains(__instr)) {
@@ -416,6 +432,8 @@ namespace sh {
                     return "UNKN";
                 }
             }
+
+
 
             inline static std::string GetInstructionFullName(u8 __instr) {
                 return std::format("{}[{:02x}]", GetInstructionName(__instr), __instr);

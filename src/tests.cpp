@@ -6,6 +6,37 @@ namespace sh {
         
 
     }
+
+    TestComponent TestRunner::ParseTestComponent(const std::string& line) {
+        TestComponent test(TestComponentType::INVALID, 0,0);
+        std::string ln = std::string(line);
+        ln = Funcs::ToUpper(ln);
+        if (ln.starts_with("MEM")) {
+            ln = ln.substr(4);
+            auto v = Funcs::SplitString(ln,'=');
+            test.index = Funcs::GetInt(v[0]);
+            test.value = Funcs::GetInt(v[1]);
+            test.type = TestComponentType::MEMORY;
+        } else if (ln.starts_with("FLAG:")) {
+            char flag = ln[5];
+
+            test.type = TestComponentType::FLAG;
+            test.index = 
+
+
+        } else if (Funcs::CharInList(line[0], REGNAMES)) {
+            test.index = CPU::REGISTER_NAMES.at(line[0]);
+            ln = ln.substr(2);
+            test.value = Funcs::GetInt(ln);
+            test.type = TestComponentType::REGISTER;
+        }
+
+
+
+        return test;
+
+
+    }
     void TestRunner::LoadFromFile(const std::string& path) {
         std::ifstream file(path);
 
@@ -33,7 +64,7 @@ namespace sh {
                     std::string name = "";
                     int pos = line.find_first_of(' ');
                     if (pos != std::string::npos) {
-                        test->name = line.substr(pos+1);
+                        test->name = std::format("{}[{}]", line.substr(pos+1), idx);
                     } else {
                         test->name = std::format("TEST[{}]", idx);
                     }
@@ -49,37 +80,51 @@ namespace sh {
                     reading_code = false;
                     reading_setup = false;
                 } else if (reading_setup) {
+                    TestComponent t = ParseTestComponent(line);
+                    if (t.type != TestComponentType::INVALID) {
+                        test->setup.push_back(t);
 
+                    } else {
+                        throw std::runtime_error("Invalid Test Component" + line);
+                    }
                 } else if (reading_code) {
                     test->code += "\n" + line;
                 } else if (reading_results) {
+                    TestComponent t = ParseTestComponent(line);
+                    if (t.type != TestComponentType::INVALID) {
+                        test->expected.push_back(t);
+
+                    } else {
+                        throw std::runtime_error("Invalid Test Component" + line);
+                    }                    
                 }
             }
 
         } else {
             //fucken die
+            throw std::runtime_error("File not open");
         }
         
     }
 
     void TestRunner::Load() {
-        tests.push_back(
-            {
-                "ADDC B",
-                {{TestResultType::REGISTER, CPU::REG_INDEX::RIA, 1}, {TestResultType::REGISTER, CPU::REG_INDEX::RIB, 2}},
-                {{TestResultType::REGISTER, CPU::REG_INDEX::RIA, 3}, {TestResultType::REGISTER, CPU::REG_INDEX::RIB, 2}},
-                "ADDC B"
-            }
-        );
+        // tests.push_back(
+        //     {
+        //         "ADDC B",
+        //         {{TestComponentType::REGISTER, CPU::REG_INDEX::RIA, 1}, {TestComponentType::REGISTER, CPU::REG_INDEX::RIB, 2}},
+        //         {{TestComponentType::REGISTER, CPU::REG_INDEX::RIA, 3}, {TestComponentType::REGISTER, CPU::REG_INDEX::RIB, 2}},
+        //         "ADDC B"
+        //     }
+        // );
 
-        tests.push_back(
-            {
-                "SUBC B",
-                {{TestResultType::REGISTER, CPU::REG_INDEX::RIA, 3}, {TestResultType::REGISTER, CPU::REG_INDEX::RIB, 2}},
-                {{TestResultType::REGISTER, CPU::REG_INDEX::RIA, 1}, {TestResultType::REGISTER, CPU::REG_INDEX::RIB, 2}},
-                "FCST\nSUBC B"
-            }
-        );        
+        // tests.push_back(
+        //     {
+        //         "SUBC B",
+        //         {{TestComponentType::REGISTER, CPU::REG_INDEX::RIA, 3}, {TestComponentType::REGISTER, CPU::REG_INDEX::RIB, 2}},
+        //         {{TestComponentType::REGISTER, CPU::REG_INDEX::RIA, 1}, {TestComponentType::REGISTER, CPU::REG_INDEX::RIB, 2}},
+        //         "FCST\nSUBC B"
+        //     }
+        // );        
     }
 
     void TestRunner::Run() {
@@ -104,9 +149,9 @@ namespace sh {
 
             if (ok) {
                 for (auto& setup : test.setup) {
-                    if (setup.type == TestResultType::MEMORY) {
+                    if (setup.type == TestComponentType::MEMORY) {
                         cpu.memory[setup.index] = setup.value;
-                    } else if (setup.type == TestResultType::REGISTER) {
+                    } else if (setup.type == TestComponentType::REGISTER) {
                         *cpu.regPointers[setup.index] = setup.value;
                     }
                 } 
@@ -123,7 +168,7 @@ namespace sh {
             }
             if (ok) {
                 for (auto& expected : test.expected) {
-                    if (expected.type == TestResultType::MEMORY) {
+                    if (expected.type == TestComponentType::MEMORY) {
                         ok = cpu.memory[expected.index] == expected.value;
 
                         if (!ok) {
@@ -136,7 +181,7 @@ namespace sh {
 
 
                         
-                    } else if (expected.type == TestResultType::REGISTER) {
+                    } else if (expected.type == TestComponentType::REGISTER) {
                         ok = *cpu.regPointers[expected.index] == expected.value;
                         if (!ok) {
                             std::cout << "Regiser " << CPU::REGISTER_NAMES_BY_INDEX.at(expected.index) << " does not = " << expected.value << "\n" <<

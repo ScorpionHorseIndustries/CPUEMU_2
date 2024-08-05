@@ -38,7 +38,7 @@ MULT B
 A=30
 B=6
 
-//TEMP COMP eq
+//TEST COMP eq
 //CODE
 LODA #1
 LODB #1
@@ -64,6 +64,12 @@ LODA #1
 LODB #2
 COMP
 //RESULT
-flageq=false
-flaglt=false
-flaggt=true
+flag:eq=false
+flag:lt=false
+flag:gt=true
+flag:halt=false
+flag:carry=false
+flag:neg=false
+flag:Overflow=false
+flag:float=false
+flag:zero=false

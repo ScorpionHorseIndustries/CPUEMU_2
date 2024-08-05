@@ -6,20 +6,21 @@ namespace sh {
 
     
 
-    enum class TestResultType : u8 {
+    enum class TestComponentType : u8 {
         INVALID,
         REGISTER,
-        MEMORY
+        MEMORY,
+        FLAG,
     
     };
 
     
-    struct TestResult {
+    struct TestComponent {
         
-        TestResultType type;
+        TestComponentType type;
         u16 index;
         u16 value;
-        TestResult( TestResultType _type, u16 _index, u16 _value) : 
+        TestComponent( TestComponentType _type, u16 _index, u16 _value) : 
             type(_type), index(_index), value(_value) {
 
         }
@@ -28,16 +29,16 @@ namespace sh {
 
     
     };
-    typedef TestResult TestSetup;
+    
 
     struct Test {
         std::string name;
-        std::vector<TestResult> expected;
-        std::vector<TestSetup> setup;
+        std::vector<TestComponent> expected;
+        std::vector<TestComponent> setup;
         std::string code;
         Test() {
         }
-        Test(const std::string& _name, std::vector<TestSetup> _setup, std::vector<TestResult> _expected, const std::string& _code) 
+        Test(const std::string& _name, std::vector<TestComponent> _setup, std::vector<TestComponent> _expected, const std::string& _code) 
             : setup(_setup), expected(_expected), code(_code), name(_name) {
 
             
@@ -57,6 +58,7 @@ namespace sh {
             void Load();
             void LoadFromFile(const std::string& path);
             void Run();
+            TestComponent ParseTestComponent(const std::string& line);
     };
 
 

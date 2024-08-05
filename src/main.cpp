@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 
     if (tests) {
         sh::TestRunner tests;
-        tests.Load();
+        tests.LoadFromFile("tests\\test.dat");
         tests.Run();
 
 
